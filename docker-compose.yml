@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:14
+    container_name: chat-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  chat-backend:
+    build:
+      context: ./chat-backend
+      dockerfile: dockerfile
+    container_name: chat-backend
+    environment:
+      DB_HOST: db
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: "5432"
+      OPENAI_API_KEY: ""
+      OPENAI_API_PROVIDER: "http://llama:8000"
+      OPENAI_API_MODEL: llama4
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - llama
+
+  chat-frontend:
+    build:
+      context: ./chat-frontend
+      dockerfile: Dockerfile
+    container_name: chat-frontend
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://chat-backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - chat-backend
+      - llama
+
+  llama:
+    build:
+      context: .
+      dockerfile: dockerfile.llama
+    container_name: llama
+    ports:
+      - "8000:8000"

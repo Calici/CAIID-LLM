@@ -1,0 +1,13 @@
+*.log
+*.tmp
+node_modules
+/build
+.next/cache
+coverage
+.DS_Store
+.Thumbs.db
+.eslintcache
+.npx
+.vscode
+
+chat-backend/.poetry
