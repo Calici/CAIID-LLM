@@ -68,7 +68,7 @@ CREATE TABLE configs (
 Creates a new workspace with the following payload: 
 ```ts
 {  
-  name: Option<string>,
+  name: string | null,
   user_prompt: string
 }
 ```
@@ -126,11 +126,11 @@ type HistoryT = MessageT[]
 type StateT = {
   messages: MessageT[]
   queries: {
-    title: str,
-    source: str,
-    abstract: Optional<str>,
-    authors: str[],
-    doi: Optional<str>
+    title: string,
+    source: string,
+    abstract: string | null,
+    authors: string[],
+    link: string | null
   }[]
 }
 
@@ -151,14 +151,14 @@ Sends a chat. This is meant to be an SSE event backend where each GET request wi
 ```ts
 {
   user_prompt: string,
-  uuid: Option<str>
+  uuid: string | null
 }
 ````
 Returning as SSE:
 ```ts
 {
   type: "chat",
-  content: MessageT
+  content: ModelResponseT
 } | {
   type: "record",
   content: {
@@ -167,17 +167,17 @@ Returning as SSE:
     chat_history: StateT,
     last_modified: datestring,
     create_date: datestring
-  } | {
-    type: "query"
-      content: {
+  } 
+} | {
+    type: "query",
+    content: {
       title: str,
       source: str,
-      abstract: Optional<str>,
+      abstract: string | null,
       authors: str[],
-      doi: Optional<str>
+      doi: string | null
     }[]
   }
-}
 ```
 The following care have to be taken to handle the SSE Event:
 - stitch every `ModelMessageT` until either a `tool_call` or a `ModelEndResponseT` is made. Once a `ModelEndResponseT` is given, this implies that the SSE can be closed. 
@@ -189,7 +189,7 @@ Upload a new file into the filesystem.
 ```ts
 {
   name: string,
-  summary: Option<string>,
+  summary: string | null,
   file: File
 }
 ```
@@ -242,7 +242,7 @@ string
 - [GET] `agent.summarise_file/<temp_file_uuid>`
 This will return a summary of the given file. 
 ```ts
-Option<string>
+string | null
 ```
 
 ### IV. LLM Server Management

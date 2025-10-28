@@ -116,7 +116,7 @@ async def chat_streamer(
     is_new: bool,
 ) -> AsyncIterable[ChatPayload | RecordPayload | QueryPayload]:
     if is_new:
-        yield serialize_workspace(workspace)
+        yield RecordPayload(content=serialize_workspace(workspace))
     async for ev in agent.run_stream_events(
         user_message, message_history=chat_state.messages.to_pydantic()
     ):
@@ -151,7 +151,7 @@ async def chat_serializer(
     coro: AsyncIterable[ChatPayload | RecordPayload | QueryPayload],
 ) -> AsyncIterable[str]:
     async for e in coro:
-        yield e.model_dump_json()
+        yield f"data: {e.model_dump_json()}\n"
 
 
 class WorkspaceChatPayload(BaseModel):

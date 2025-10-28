@@ -1,4 +1,4 @@
-Given the user's chat history, output a suitable topic for the conversation. If no history can be given, just output untitled_chat
+Given the user's chat history, output a one sentence suitable topic for the conversation. If no history can be given, just output untitled_chat. Do not output any special characters. 
 
 Example: 
 Input:
