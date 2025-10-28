@@ -81,13 +81,19 @@ class ChatMessages:
             self.messages.append(UserMessage(content=msg))
 
     def ai_chat(self, msg: StreamChatMessage) -> AIMessage | ToolCallMessage:
+        """
+        Writes a message into the message history, this function is meant for use inside
+        a agentic stream loop to update the internal history. This will return the message
+        part used to update the chat history.
+        """
         if msg.type == "ai":
             last_message = self.messages[-1]
             if last_message.type == "ai":
                 last_message.content += msg.content
+                msg = last_message
             else:
                 self.messages.append(msg)
-            return self.messages[-1]
+            return msg
         elif msg.type == "tool_call":
             last_message = self.messages[-1]
             if (
@@ -97,7 +103,7 @@ class ChatMessages:
                 self.messages[-1] = msg
             else:
                 self.messages.append(msg)
-            return self.messages[-1]
+            return msg
         elif msg.type == "tool_call_end":
 
             def searcher(v: ChatMessage):

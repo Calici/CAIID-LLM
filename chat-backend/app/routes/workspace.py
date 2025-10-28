@@ -117,10 +117,15 @@ async def chat_streamer(
 ) -> AsyncIterable[ChatPayload | RecordPayload | QueryPayload]:
     if is_new:
         yield RecordPayload(content=serialize_workspace(workspace))
+    query_sent_before = False
     async for ev in agent.run_stream_events(
         user_message, message_history=chat_state.messages.to_pydantic()
     ):
-        if ev.event_kind == "part_delta" and ev.delta.part_delta_kind == "text":
+        if ev.event_kind == "part_start" and ev.part.part_kind == "text":
+            message = AIMessage(content=ev.part.content)
+            _ = chat_state.messages.ai_chat(message)
+            yield ChatPayload(content=message)
+        elif ev.event_kind == "part_delta" and ev.delta.part_delta_kind == "text":
             message = AIMessage(content=ev.delta.content_delta)
             _ = chat_state.messages.ai_chat(message)
             yield ChatPayload(content=message)
@@ -141,8 +146,9 @@ async def chat_streamer(
                 )
             )
             # query is done somehow
-            if not chat_state.allow_query:
+            if not chat_state.allow_query and not query_sent_before:
                 yield QueryPayload(content=chat_state.queries)
+                query_sent_before = True
             yield ChatPayload(content=message)
     workspace.save_state(chat_state, settings.chat_dir())
 
