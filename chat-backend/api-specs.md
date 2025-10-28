@@ -175,7 +175,7 @@ Returning as SSE:
       source: str,
       abstract: string | null,
       authors: str[],
-      doi: string | null
+      link: string | null
     }[]
   }
 ```
