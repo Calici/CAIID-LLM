@@ -36,3 +36,4 @@ htmlcov/
 
 # Node
 node_modules/
+data/

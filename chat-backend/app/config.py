@@ -1,42 +1,128 @@
-"""Application configuration and agent setup."""
+"""Application configuration and provider factories."""
 
-from functools import lru_cache
-
-from pydantic import Field
-from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIChatModel
+from functools import cached_property
 from pydantic_ai.providers.openai import OpenAIProvider
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai import Agent, Tool
+from pydantic_settings import BaseSettings
+from app.db import (
+    db_provider_manager,
+    SqliteProvider,
+    FilesSchema,
+    ConfigsSchema,
+    WorkspaceSchema,
+    TempFilesSchema,
+)
+from app.libs.chat import ChatFile
+from app.libs.expected import Expected
+import pathlib
+
+from app.libs.file_reader import file_reader
+
+
+class ConfigError(RuntimeError):
+    """Raised when persisted configuration is invalid or incomplete."""
+
+    pass
 
 
 class Settings(BaseSettings):
     """Runtime configuration loaded from the environment."""
 
-    model_config = SettingsConfigDict(env_file=('.env',), extra="ignore")
+    db_path: pathlib.Path
+    root_path: pathlib.Path
 
-    openai_api_key: str = Field(alias="OPENAI_API_KEY")
-    openai_api_provider: str = Field(alias="OPENAI_API_PROVIDER")
-    openai_default_model: str = Field(alias="OPENAI_API_MODEL")
+    def data_path(self) -> pathlib.Path:
+        directory = self.root_path / "root"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
 
-    def initial_check(self) -> None:
-        """Ensure required environment variables are populated."""
+    def tmp_path(self) -> pathlib.Path:
+        directory = self.root_path / "tmp"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
 
-        assert self.openai_api_key is not None, "OPENAI_API_KEY must be set"
-        assert self.openai_api_provider is not None, "OPENAI_API_PROVIDER must be set"
-        assert self.openai_default_model is not None, "OPENAI_API_MODEL must be set"
+    def prompt_dir(self) -> pathlib.Path:
+        return pathlib.Path("assets") / "system_prompt"
 
-    def get_agent(self) -> Agent:
-        """Create an agent instance configured for the current environment."""
+    def chat_dir(self) -> pathlib.Path:
+        directory = self.root_path / "chat"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
 
-        resolved_model = self.openai_default_model
-        api_key = self.openai_api_key or None
-        provider = OpenAIProvider(base_url=self.openai_api_provider, api_key=api_key)
-        chat_model = OpenAIChatModel(model_name=resolved_model, provider=provider)
-        return Agent(model=chat_model)
+    def get_db_conn(self):
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        return db_provider_manager(SqliteProvider(self.db_path))
+
+    @cached_property
+    def config(self):
+        return ConfigsSchema("configs")
+
+    def get_model(self) -> Expected[OpenAIChatModel, ConfigError]:
+        """Return an OpenAIChatModel configured from persisted server settings."""
+        with self.get_db_conn() as conn:
+            model_name = self.config.get_value("MODEL_NAME", conn)
+            api_url = self.config.get_value("API_URL", conn)
+            api_key = self.config.get_value("API_KEY", conn)
+
+        if model_name is None:
+            return Expected(
+                OpenAIChatModel, ConfigError, ConfigError("model_name is missing")
+            )
+        if api_url is None:
+            return Expected(
+                OpenAIChatModel, ConfigError, ConfigError("api_url is missing")
+            )
+        if api_key is None:
+            return Expected(
+                OpenAIChatModel, ConfigError, ConfigError("api_key is missing")
+            )
+
+        provider = OpenAIProvider(base_url=api_url, api_key=api_key)
+        return Expected(
+            OpenAIChatModel,
+            ConfigError,
+            OpenAIChatModel(model_name=model_name, provider=provider),
+        )
+
+    def get_topic_agent(self):
+        model = self.get_model()
+        with open(self.prompt_dir() / "topic.md", "r") as f:
+            return model.transform(
+                Agent, lambda model: Agent(model=model, system_prompt=f.read())
+            )
+
+    def get_summary_agent(self):
+        model = self.get_model()
+        with open(self.prompt_dir() / "summary.md", "r") as f:
+            return model.transform(
+                Agent, lambda model: Agent(model=model, system_prompt=f.read())
+            )
+
+    def initialise_database(self):
+        with self.get_db_conn() as conn:
+            _ = conn.run_query(ConfigsSchema.create_table_sql("configs"))
+            _ = conn.run_query(FilesSchema.create_table_sql("files"))
+            _ = conn.run_query(WorkspaceSchema.create_table_sql("workspaces"))
+            _ = conn.run_query(TempFilesSchema.create_table_sql("temp_files"))
+
+    def set_up(self):
+        self.initialise_database()
+        _ = self.data_path()
+        _ = self.tmp_path()
+        _ = self.chat_dir()
+
+    def get_files(self) -> list[ChatFile]:
+        with self.get_db_conn() as conn:
+            return list(
+                map(
+                    lambda x: ChatFile(name=x.name, summary=x.summary, path=x.name),
+                    FilesSchema.all(conn),
+                )
+            )
 
 
-@lru_cache
-def get_settings() -> Settings:
-    settings = Settings()
-    settings.initial_check()
-    return settings
+settings = Settings(
+    db_path=pathlib.Path("data/local.db"), root_path=pathlib.Path("data")
+)
+settings.set_up()

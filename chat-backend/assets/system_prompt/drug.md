@@ -1,0 +1,1 @@
+Given the user's chat history, output {keyword_count} keywords in the form of a JSON list. Example: `["<kw_1>", "<k]` The keywords you output will be used to search in a database of approved drugs to add additional context to answer questions in the chat history. Generate short concise keyword that will expand the context. If no query is deemed necessary, output an empty list. 

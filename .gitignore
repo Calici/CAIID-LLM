@@ -11,3 +11,5 @@ coverage
 .vscode
 
 chat-backend/.poetry
+.gitignore
+models

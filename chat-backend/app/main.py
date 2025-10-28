@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
+from app.routes.agent import router as agent_router
+from app.routes.fs import router as fs_router
+from app.routes.server import router as server_router
+from app.routes.workspace import router as workspace_router
+
+
 app = FastAPI()
 
-_HTML_BODY = "<h1> HELLO WORLD </h1>"
-
-@app.api_route("/", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"], response_class=HTMLResponse)
-async def root() -> str:
-    return _HTML_BODY
-
-
-@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"], response_class=HTMLResponse)
-async def catch_all(path: str) -> str:
-    return _HTML_BODY
+app.include_router(server_router)
+app.include_router(workspace_router)
+app.include_router(fs_router)
+app.include_router(agent_router)
