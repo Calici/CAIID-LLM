@@ -7,17 +7,19 @@ from typing_extensions import Annotated
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from fastapi.exceptions import HTTPException
-from pydantic import BaseModel, AfterValidator
+from pydantic import BaseModel, AfterValidator, TypeAdapter
 from pydantic_ai.agent import Agent
 from app.config import settings
 from app.db import WorkspaceSchema
 from app.libs.chat import (
     AIMessage,
+    ChatMessage,
     ChatState,
+    ChatStateDump,
     ToolCallCompleteMessage,
     ToolCallMessage,
 )
-from app.libs.drug_query import PublicationResult
+from app.libs.drug_query import PublicationQuery, PublicationResult
 from app.routes.agent import create_topic_from_prompt
 
 
@@ -63,13 +65,32 @@ async def rename_workspace(uuid: str, payload: WorkspaceRenamePayload):
     return record
 
 
+class SerializedWorkspace(BaseModel):
+    name: str
+    uuid: str
+    last_modified: str
+    create_date: str
+    chat_history: ChatStateDump
+
+
+def serialize_workspace(record: WorkspaceSchema):
+    state = record.load_state(settings.chat_dir(), settings.data_path(), [])
+    return SerializedWorkspace(
+        name=record.name,
+        uuid=str(record.uuid),
+        last_modified=record.last_modified.isoformat(),
+        create_date=record.create_date.isoformat(),
+        chat_history=state.to_dump(),
+    )
+
+
 @router.get("/workspace/{uuid}")
 async def get_workspace(uuid: str):
     with settings.get_db_conn() as conn:
         record = WorkspaceSchema.get_by_uuid(conn, uuid)
     if record is None:
         raise HTTPException(status_code=404, detail="Workspace not found")
-    return record
+    return serialize_workspace(record)
 
 
 class ChatPayload(BaseModel):
@@ -79,7 +100,7 @@ class ChatPayload(BaseModel):
 
 class RecordPayload(BaseModel):
     type: Literal["record"] = "record"
-    content: WorkspaceSchema
+    content: SerializedWorkspace
 
 
 class QueryPayload(BaseModel):
@@ -95,7 +116,7 @@ async def chat_streamer(
     is_new: bool,
 ) -> AsyncIterable[ChatPayload | RecordPayload | QueryPayload]:
     if is_new:
-        yield RecordPayload(content=workspace)
+        yield serialize_workspace(workspace)
     async for ev in agent.run_stream_events(
         user_message, message_history=chat_state.messages.to_pydantic()
     ):

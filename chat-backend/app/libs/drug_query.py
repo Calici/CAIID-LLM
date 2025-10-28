@@ -14,26 +14,29 @@ class AgentError(BaseModel):
     message: str
 
 
+class DoiResolver:
+    async def resolve(self, doi: str, client: httpx.AsyncClient) -> str:
+        res = await client.get(f"https://dx.doi.org/{doi}", follow_redirects=False)
+        return res.headers.get("LOCATION")
+
+
+class ClinicalTrialsResolver:
+    async def resolve(self, id: str, client: httpx.AsyncClient) -> str:
+        return f"https://clinicaltrials.gov/study/{id}"
+
+
 class PublicationResult(BaseModel):
     title: str
     source: str
     abstract: str | None
     authors: list[str]
-    doi: str | None
+    link: str | None
 
     @staticmethod
     def create_expected(
         value: list[PublicationResult] | AgentError,
     ) -> Expected[list["PublicationResult"], AgentError]:
         return Expected(list, AgentError, value)
-
-    async def resolve_doi(self, client: httpx.AsyncClient) -> str | None:
-        if self.doi is not None:
-            res = await client.get(
-                f"https://dx.doi.org/{self.doi}", follow_redirects=False
-            )
-            return res.headers.get("LOCATION")
-        return None
 
     async def to_xml(self, client: httpx.AsyncClient):
         root = ET.Element("publication", src=self.source, title=self.title)
@@ -49,9 +52,8 @@ class PublicationResult(BaseModel):
         for author in self.authors:
             authors.append(create_elem("author", text=author))
         root.append(authors)
-        pdf_link = await self.resolve_doi(client)
-        if pdf_link is not None:
-            root.append(create_elem("link", text=pdf_link))
+        if self.link is not None:
+            root.append(create_elem("link", text=self.link))
         return ET.tostring(root).decode()
 
 
@@ -93,6 +95,8 @@ class PubmedQuery:
                 else None
             )
             doi = article.find("MedlineCitation/Article/ELocationID[@EIdType='doi']")
+            if doi is not None:
+                doi = await DoiResolver().resolve(doi.text, client)
             try:
                 summaries.append(
                     PublicationResult.model_validate(
@@ -100,7 +104,7 @@ class PubmedQuery:
                             "pub_date": pub_date,
                             "title": title.text if title is not None else None,
                             "authors": authors,
-                            "doi": doi.text if doi is not None else None,
+                            "link": doi,
                             "abstract": abstract.text if abstract is not None else None,
                             "source": self.source,
                         }
@@ -166,6 +170,9 @@ class EuropePMCQuery:
         parsed_res = json.loads(res.text)
         publications: list[PublicationResult] = []
         for record in parsed_res["resultList"]["result"]:
+            doi = record.get("doi")
+            if doi is not None:
+                doi = await DoiResolver().resolve(doi, client)
             try:
                 publications.append(
                     PublicationResult.model_validate(
@@ -175,12 +182,69 @@ class EuropePMCQuery:
                             "source": self.source,
                             "authors": record.get("authorString", "").split(","),
                             "pub_date": record.get("firstPublicationDate", ""),
-                            "doi": record.get("doi"),
+                            "link": doi,
                         }
                     )
                 )
             except ValidationError as exc:
                 logging.error(f"EuropePMCQuery: {exc}")
+                continue
+        return PublicationResult.create_expected(publications)
+
+
+class ClinicalTrialsGov:
+    def __init__(self, res_count: int = 5):
+        self.res_count = 5
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        res = await client.get(
+            "https://clinicaltrials.gov/api/v2/studies",
+            params={"pageSize": self.res_count, "query.term": " OR ".join(kws)},
+        )
+        if res.status_code > 299:
+            return PublicationResult.create_expected(AgentError(message=res.text))
+        parsed_res = json.loads(res.text)
+        studies = parsed_res["studies"]
+        publications: list[PublicationResult] = []
+        for study in studies:
+            try:
+                abstract = study["protocolSection"].get(
+                    "descriptionModule",
+                    {"briefSummary": "", "detailedDescription": ""},
+                )
+                if abstract.get("detailedDescription") is None:
+                    abstract = abstract.get("briefSummary", "")
+                else:
+                    abstract = abstract.get("detailedDescription")
+                publications.append(
+                    PublicationResult.model_validate(
+                        {
+                            "title": study["protocolSection"]["identificationModule"][
+                                "briefTitle"
+                            ],
+                            "abstract": abstract,
+                            "source": "Clinical Trials",
+                            "authors": [
+                                study["protocolSection"]["identificationModule"][
+                                    "organization"
+                                ]["fullName"]
+                            ],
+                            "pub_date": study["protocolSection"]["statusModule"][
+                                "startDateStruct"
+                            ]["date"],
+                            "link": await ClinicalTrialsResolver().resolve(
+                                study["protocolSection"]["identificationModule"][
+                                    "nctId"
+                                ],
+                                client,
+                            ),
+                        }
+                    )
+                )
+            except ValidationError as e:
+                logging.error(f"ClinicalTrials: {e}")
                 continue
         return PublicationResult.create_expected(publications)
 

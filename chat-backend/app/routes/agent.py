@@ -18,9 +18,11 @@ async def run_agent(agent: Agent, content: str) -> Expected[str, ConfigError]:
 
 
 async def create_topic_from_prompt(user_input: str):
-    return await settings.get_topic_agent().aand_then(
-        str, lambda agent: run_agent(agent, user_input)
-    )
+    return (
+        await settings.get_topic_agent().aand_then(
+            str, lambda agent: run_agent(agent, user_input)
+        )
+    ).transform(str, lambda x: "".join([i for i in x if x not in ["'", "`", '"']]))
 
 
 async def create_file_summary(content: str):

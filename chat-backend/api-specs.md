@@ -141,7 +141,7 @@ Return all the specifics of a workspace.
 {
   name: string,
   uuid: string,
-  chat_history: MessageT[],
+  chat_history: StateT[],
   last_modified: datestring,
   create_date: datestring
 }

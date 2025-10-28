@@ -15,6 +15,7 @@ from typing import Annotated, Callable, Literal, final, TypeVar
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.tools import Tool
 from app.libs.drug_query import (
+    ClinicalTrialsGov,
     EuropePMCQuery,
     PublicationQueryMaker,
     PublicationResult,
@@ -79,7 +80,7 @@ class ChatMessages:
         else:
             self.messages.append(UserMessage(content=msg))
 
-    def ai_chat(self, msg: StreamChatMessage) -> ChatMessage:
+    def ai_chat(self, msg: StreamChatMessage) -> AIMessage | ToolCallMessage:
         if msg.type == "ai":
             last_message = self.messages[-1]
             if last_message.type == "ai":
@@ -177,7 +178,9 @@ class ChatState:
         self.data_dir = data_dir
         self.queries = queries
         self.client = httpx.AsyncClient()
-        self.pub_query_maker = PublicationQueryMaker([PubmedQuery(), EuropePMCQuery()])
+        self.pub_query_maker = PublicationQueryMaker(
+            [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov()]
+        )
         self.allow_query = True
         super().__init__()
 
@@ -270,6 +273,9 @@ class ChatState:
         return ChatStateDump(
             queries=self.queries, messages=self.messages.messages
         ).model_dump_json()
+
+    def to_dump(self) -> ChatStateDump:
+        return ChatStateDump(queries=self.queries, messages=self.messages.messages)
 
     @staticmethod
     def from_file(
