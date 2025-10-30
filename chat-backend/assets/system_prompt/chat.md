@@ -32,3 +32,5 @@ LOL You (summarise abstract if too long)
 Authors: John D, Jane D
 [PDF](https://example.com/abcd-efgh)  
 ```
+
+The name of the user is {username}

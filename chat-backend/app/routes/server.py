@@ -14,6 +14,7 @@ async def get_server() -> dict[str, str | None]:
             "name": settings.config.get_value("SERVER_NAME", conn),
             "model_name": settings.config.get_value("MODEL_NAME", conn),
             "api_url": settings.config.get_value("API_URL", conn),
+            "username": settings.config.get_value("USER_NAME", conn),
         }
 
 
@@ -22,6 +23,7 @@ class ServerUpdatePayload(BaseModel):
     model_name: str
     api_url: str
     api_key: str
+    username: str
 
 
 @router.post("/server.update")
@@ -31,3 +33,4 @@ async def update_server(d: ServerUpdatePayload) -> None:
         settings.config.set_value("MODEL_NAME", d.model_name, conn)
         settings.config.set_value("API_URL", d.api_url, conn)
         settings.config.set_value("API_KEY", d.api_key, conn)
+        settings.config.set_value("USER_NAME", d.username, conn)

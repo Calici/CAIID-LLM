@@ -83,6 +83,14 @@ class Settings(BaseSettings):
             OpenAIChatModel(model_name=model_name, provider=provider),
         )
 
+    def get_username(self):
+        with self.get_db_conn() as conn:
+            username = self.config.get_value("USER_NAME", conn)
+            if username is None:
+                return "Anoymous User"
+            else:
+                return username
+
     def get_topic_agent(self):
         model = self.get_model()
         with open(self.prompt_dir() / "topic.md", "r") as f:
@@ -157,7 +165,7 @@ class Settings(BaseSettings):
                             max_retries=1,
                         ),
                     ],
-                    system_prompt=f.read(),
+                    system_prompt=f.read().format(username=self.get_username()),
                 ),
             )
 

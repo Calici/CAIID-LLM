@@ -235,6 +235,8 @@ Gets a list of all the files.
 - [GET] `fs.download_file/<file_uuid>`
 This will let the user download the file.
 
+- [DELETE] `fs/<file_uuid>`
+This will delete the file. 
 
 ### III. Agentic Processes
 - [GET] `agent.topic_maker/<workspace_uuid>`
@@ -252,6 +254,7 @@ string | null
 - [GET] `server`
 ```ts
 {
+  username: string,
   name: string,
   model_name: string,
   api_url: string
@@ -261,6 +264,7 @@ string | null
 This updates the api server used for LLM inference. 
 ```ts
 {
+  username: string,
   name: string,
   model_name: string,
   api_url: string,

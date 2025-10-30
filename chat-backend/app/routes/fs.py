@@ -30,12 +30,14 @@ async def temp_upload(payload: Annotated[TempUploadPayload, Form()]):
     save_path = settings.tmp_path() / payload.name
     with settings.get_db_conn() as get_db_conn:
         temp_record = TempFilesSchema.get_by_name(get_db_conn, payload.name)
-        if temp_record is not None:
-            raise HTTPException(status_code=409, detail="file exists")
-        temp_record = TempFilesSchema.create(
-            name=save_path.name, extension=save_path.suffix
-        )
-        _ = get_db_conn.run_query(temp_record.insert_sql())
+        if temp_record is None:
+            temp_record = TempFilesSchema.create(
+                name=save_path.name, extension=save_path.suffix
+            )
+            _ = get_db_conn.run_query(temp_record.insert_sql())
+        else:
+            temp_record.extension = save_path.suffix
+            _ = get_db_conn.run_query(temp_record.update_sql())
     with open(save_path, "wb") as f:
         _ = f.write(await payload.file.read())
     return {"uuid": str(temp_record.uuid)}
@@ -52,7 +54,7 @@ async def confirm_upload(temp_file_uuid: str, payload: ConfirmUploadPayload):
         temp_record = TempFilesSchema.get_by_uuid(get_db_conn, temp_file_uuid)
         if temp_record is None:
             raise HTTPException(status_code=404, detail="temp_files not found")
-        cur_record = FilesSchema.get_by_name(get_db_conn, temp_record.name)
+        cur_record = FilesSchema.get_by_name(get_db_conn, payload.name)
         if cur_record is not None:
             raise HTTPException(status_code=409, detail="file exists. change name ?")
         record = FilesSchema.create(name=payload.name, summary=payload.summary)
