@@ -1,6 +1,10 @@
 from __future__ import annotations
 import httpx
-from pydantic import BaseModel, BeforeValidator, ConfigDict, PlainSerializer
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    ValidationError,
+)
 from pydantic.type_adapter import TypeAdapter
 from pydantic_ai.agent import Agent
 from pydantic_ai.messages import (
@@ -10,7 +14,7 @@ from pydantic_ai.messages import (
     TextPart,
     UserPromptPart,
 )
-from typing import Annotated, Callable, Literal, final, TypeVar
+from typing import Callable, Literal, Protocol, final, TypeVar
 
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.tools import Tool
@@ -117,13 +121,13 @@ class ChatMessages:
             return message
 
     def to_xml(self, limit: int = 2):
-        limit = max(limit, 0)
-        start = max(0, len(self.messages) - limit)
-        end = len(self.messages)
-        messages = self.messages[start:end]
-
         root = ET.Element("chat_history")
-        for m in messages:
+        filtered_messages = []
+        for i in range(len(self.messages) - 1, -1, -1):
+            filtered_messages.append(self.messages[i])
+            if len(filtered_messages) == limit:
+                break
+        for m in reversed(filtered_messages):
             if m.type == "ai" or m.type == "user":
                 element = ET.SubElement(root, "msg", role=m.type)
                 element.text = m.content
@@ -165,6 +169,42 @@ class ChatStateDump(BaseModel):
     messages: list[ChatMessage]
 
 
+class KeywordMaker(Protocol):
+    async def get_keywords(self, messages: ChatMessages) -> list[str]: ...
+
+
+class BlankKeywordMaker:
+    async def get_keywords(self, messages: ChatMessages) -> list[str]:
+        return []
+
+
+class AgenticKeywordMaker:
+    def __init__(self, agent: Agent):
+        self.agent = agent
+
+    def strip_ticks(self, msg: str) -> str:
+        msg_beg = msg.find("```")
+        if msg_beg == -1:
+            return msg
+        tick_end = msg.find("\n", msg_beg + 3)
+        if tick_end == -1:
+            return ""
+        msg_end = msg.find("```", tick_end + 1)
+        if msg_end == -1:
+            return msg
+        msg = msg[tick_end:msg_end]
+        return msg.strip()
+
+    async def get_keywords(self, messages: ChatMessages) -> list[str]:
+        chat_history = messages.to_xml()
+        try:
+            result = (await self.agent.run(chat_history)).output
+            clean_result = self.strip_ticks(result)
+            return TypeAdapter(list[str]).validate_json(clean_result)
+        except ValidationError:
+            return []
+
+
 @final
 class ChatState:
     queries: list[PublicationResult]
@@ -176,6 +216,7 @@ class ChatState:
         self,
         messages: ChatMessages,
         data_dir: pathlib.Path,
+        kw_maker: KeywordMaker = BlankKeywordMaker(),
         files: list[ChatFile] = [],
         queries: list[PublicationResult] = [],
     ):
@@ -187,6 +228,7 @@ class ChatState:
         self.pub_query_maker = PublicationQueryMaker(
             [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov()]
         )
+        self.kw_maker = kw_maker
         self.allow_query = True
         super().__init__()
 
@@ -229,50 +271,67 @@ class ChatState:
             )
         )
 
-    async def query_publications(self, kws: list[str]):
+    async def query_publications(self):
         if not self.allow_query:
-            return "query success, call get_publications to retrieve entries"
+            return (
+                f"Found {len(self.queries)}. Call get_publications to retrieve entries"
+            )
         self.allow_query = False
+        kws = await self.kw_maker.get_keywords(self.messages)
+        if len(kws) == 0:
+            return "No keywords. Be more specific"
         res = await self.pub_query_maker.query(kws)
         if res.has_value():
             self.queries = res.value()
-            return "query success, call get_publications to retrieve entries"
+            return (
+                f"Found {len(self.queries)}. Call get_publications to retrieve entries"
+            )
         return "failure"
 
-    def get_agent(self, model: OpenAIChatModel) -> Agent:
+    async def query_publications_length(self):
+        return len(self.queries)
+
+    def get_agent(self, model: OpenAIChatModel, system_prompt: str) -> Agent:
         return Agent(
             model=model,
             tools=[
                 Tool(
                     self.list_file,
                     name="ls",
-                    description="List all files in the current directory",
+                    description="List all files in the user filesystem",
                     strict=True,
                     max_retries=1,
                 ),
                 Tool(
                     self.read_file,
-                    description="Read a file in the current directory",
+                    name="read_file",
+                    description="Read a file in the current filesystem",
+                    strict=True,
+                    max_retries=1,
+                ),
+                Tool(
+                    self.query_publications_length,
+                    name="query_publications_length",
+                    description="Get the length of the current obtained publications",
                     strict=True,
                     max_retries=1,
                 ),
                 Tool(
                     self.query_publications,
-                    description="Queries publications and shows it to the user",
+                    name="query_publications",
+                    description="Queries publications, call get_publication to read the contents of queried publications.",
                     strict=True,
                     max_retries=1,
                 ),
                 Tool(
                     self.get_publications,
-                    description=(
-                        "Retrieve cached publication entries by index. Call without an "
-                        "argument to get all cached entries; use 0-based indices for "
-                        "specific entries (e.g. indices=0 or indices=[0,2])."
-                    ),
+                    name="get_publications",
+                    description=("Retrieve cached publication entries by index."),
                     strict=True,
                     max_retries=1,
                 ),
             ],
+            system_prompt=system_prompt,
         )
 
     def to_json(self) -> str:
@@ -285,10 +344,17 @@ class ChatState:
 
     @staticmethod
     def from_file(
-        p: pathlib.Path, data_dir: pathlib.Path, files: list[ChatFile]
+        p: pathlib.Path,
+        data_dir: pathlib.Path,
+        files: list[ChatFile],
+        kw_maker: KeywordMaker = BlankKeywordMaker(),
     ) -> ChatState:
         with open(p, "r") as f:
             dump_state = ChatStateDump.model_validate_json(f.read())
         return ChatState(
-            ChatMessages(dump_state.messages), data_dir, files, dump_state.queries
+            ChatMessages(dump_state.messages),
+            data_dir,
+            kw_maker,
+            files,
+            dump_state.queries,
         )

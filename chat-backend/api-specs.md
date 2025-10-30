@@ -177,6 +177,9 @@ Returning as SSE:
       authors: str[],
       link: string | null
     }[]
+  } | {
+    type: "error",
+    content: string
   }
 ```
 The following care have to be taken to handle the SSE Event:

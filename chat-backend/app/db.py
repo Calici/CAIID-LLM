@@ -5,7 +5,13 @@ from datetime import datetime
 import sqlite3
 import uuid
 import pathlib
-from app.libs.chat import ChatFile, ChatMessages, ChatState
+from app.libs.chat import (
+    BlankKeywordMaker,
+    ChatFile,
+    ChatMessages,
+    ChatState,
+    KeywordMaker,
+)
 from sqlalchemy import literal
 from sqlalchemy.dialects.sqlite import dialect as sqlite_dialect
 import contextlib
@@ -408,29 +414,14 @@ class WorkspaceSchema(BaseModel):
             WHERE uuid='{self.uuid}'
         """
 
-    def delete_sql(self, chat_dir: pathlib.Path, table_name: str = "workspaces") -> str:
-        chat_path = chat_dir / f"{self.uuid}.json"
-        chat_path.unlink(missing_ok=True)
+    def delete_sql(self, table_name: str = "workspaces") -> str:
         return f"""
             DELETE FROM {table_name}
             WHERE uuid='{self.uuid}'
         """
 
-    def create_state(
-        self, prompt: str, data_path: pathlib.Path, files: list[ChatFile]
-    ) -> ChatState:
-        return ChatState(ChatMessages(prompt), data_path, files, [])
-
-    def load_state(
-        self, chat_dir: pathlib.Path, data_path: pathlib.Path, files: list[ChatFile]
-    ) -> ChatState:
-        fpath = chat_dir / f"{self.uuid}.json"
-        return ChatState.from_file(fpath, data_path, files)
-
-    def save_state(self, state: ChatState, chat_dir: pathlib.Path):
-        fpath = chat_dir / f"{self.uuid}.json"
-        with open(fpath, "w") as f:
-            _ = f.write(state.to_json())
+    def chat_path(self, chat_dir: pathlib.Path):
+        return chat_dir / f"{self.uuid}.json"
 
     @staticmethod
     def create_table_sql(table_name: str = "workspaces") -> str:

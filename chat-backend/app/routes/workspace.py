@@ -1,25 +1,21 @@
 from __future__ import annotations
 from collections.abc import AsyncIterable
-from dataclasses import dataclass
-from typing import Literal, TypeVar
-from starlette.responses import Content
+from typing import Literal
 from typing_extensions import Annotated
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from fastapi.exceptions import HTTPException
-from pydantic import BaseModel, AfterValidator, TypeAdapter
+from pydantic import BaseModel, AfterValidator
 from pydantic_ai.agent import Agent
 from app.config import settings
 from app.db import WorkspaceSchema
-from app.libs.chat import (
+from app.libs._chat.chat_message import (
     AIMessage,
-    ChatMessage,
-    ChatState,
-    ChatStateDump,
     ToolCallCompleteMessage,
     ToolCallMessage,
 )
-from app.libs.drug_query import PublicationQuery, PublicationResult
+from app.libs._chat import BlankKeywordMaker, ChatState, FlatChatState
+from app.libs.drug_query import PublicationResult
 from app.routes.agent import create_topic_from_prompt
 
 
@@ -70,17 +66,19 @@ class SerializedWorkspace(BaseModel):
     uuid: str
     last_modified: str
     create_date: str
-    chat_history: ChatStateDump
+    chat_history: FlatChatState
 
 
 def serialize_workspace(record: WorkspaceSchema):
-    state = record.load_state(settings.chat_dir(), settings.data_path(), [])
+    state = ChatState.load(
+        record.chat_path(settings.chat_dir()), settings.data_path(), BlankKeywordMaker()
+    )
     return SerializedWorkspace(
         name=record.name,
         uuid=str(record.uuid),
         last_modified=record.last_modified.isoformat(),
         create_date=record.create_date.isoformat(),
-        chat_history=state.to_dump(),
+        chat_history=state.flatten(),
     )
 
 
@@ -108,6 +106,11 @@ class QueryPayload(BaseModel):
     content: list[PublicationResult]
 
 
+class ErrorPayload(BaseModel):
+    type: Literal["error"] = "error"
+    content: str
+
+
 async def chat_streamer(
     user_message: str,
     agent: Agent,
@@ -132,7 +135,7 @@ async def chat_streamer(
         elif ev.event_kind == "function_tool_call":
             message = chat_state.messages.ai_chat(
                 ToolCallMessage(
-                    tool_name="",
+                    tool_name=f"{ev.part.tool_name}({', '.join([str(v) for v in ev.part.args_as_dict().values()])})",
                     tool_id=ev.part.tool_name,
                     tool_call_id=ev.part.tool_call_id,
                     is_complete=False,
@@ -150,14 +153,17 @@ async def chat_streamer(
                 yield QueryPayload(content=chat_state.queries)
                 query_sent_before = True
             yield ChatPayload(content=message)
-    workspace.save_state(chat_state, settings.chat_dir())
+    ChatState.save(workspace.chat_path(settings.chat_dir()), chat_state)
 
 
 async def chat_serializer(
     coro: AsyncIterable[ChatPayload | RecordPayload | QueryPayload],
 ) -> AsyncIterable[str]:
-    async for e in coro:
-        yield f"data: {e.model_dump_json()}\n"
+    try:
+        async for e in coro:
+            yield f"{e.model_dump_json()}\n"
+    except Exception as e:
+        yield f"{ErrorPayload(content=f'{type(e)}: {str(e)}').model_dump_json()}\n"
 
 
 class WorkspaceChatPayload(BaseModel):
@@ -168,16 +174,23 @@ class WorkspaceChatPayload(BaseModel):
 @router.post("/workspace.chat")
 async def chat_with_ai(payload: WorkspaceChatPayload):
     # This part creates or queries the workspace
+    kw_maker = settings.get_keyword_maker()
+    if not kw_maker.has_value():
+        raise HTTPException(status_code=412, detail="workspace chat")
     with settings.get_db_conn() as conn:
         if payload.uuid is not None:
             is_new = False
             record = WorkspaceSchema.get_by_uuid(conn, payload.uuid)
             if record is None:
                 raise HTTPException(status_code=404, detail="workspace not found")
-            chat_state = record.load_state(
-                settings.chat_dir(), settings.data_path(), settings.get_files()
+            chat_state = ChatState.load(
+                record.chat_path(settings.chat_dir()),
+                settings.data_path(),
+                kw_maker.value(),
+                settings.get_files(),
             )
-            chat_state.messages.chat(payload.user_prompt)
+            chat_state.messages.user_chat(payload.user_prompt)
+            ChatState.save(record.chat_path(settings.chat_dir()), chat_state)
         else:
             is_new = True
             name = await create_topic_from_prompt(payload.user_prompt)
@@ -187,18 +200,22 @@ async def chat_with_ai(payload: WorkspaceChatPayload):
                 )
             record = WorkspaceSchema.create(name=name.value().strip())
             _ = conn.run_query(record.insert_sql())
-            chat_state = record.create_state(
-                payload.user_prompt, settings.data_path(), settings.get_files()
+            chat_state = ChatState.new(
+                payload.user_prompt,
+                settings.data_path(),
+                kw_maker.value(),
+                settings.get_files(),
             )
-            record.save_state(chat_state, settings.chat_dir())
+            ChatState.save(record.chat_path(settings.chat_dir()), chat_state)
     # Let's
-    model = settings.get_model()
-    if not model.has_value():
+    agent = settings.get_chat_agent(chat_state)
+    if not agent.has_value():
         raise HTTPException(status_code=412, detail="workspace chat")
-    agent = chat_state.get_agent(model.value())
     return StreamingResponse(
         chat_serializer(
-            chat_streamer(payload.user_prompt, agent, record, chat_state, is_new)
+            chat_streamer(
+                payload.user_prompt, agent.value(), record, chat_state, is_new
+            )
         )
     )
 
@@ -209,5 +226,6 @@ async def delete_workspace(uuid: str):
         record = WorkspaceSchema.get_by_uuid(conn, uuid)
         if record is None:
             raise HTTPException(status_code=404, detail="Workspace not found")
-        _ = conn.run_query(record.delete_sql(settings.chat_dir()))
+        _ = conn.run_query(record.delete_sql())
+        record.chat_path(settings.chat_dir()).unlink(missing_ok=True)
     return {"status": "deleted"}

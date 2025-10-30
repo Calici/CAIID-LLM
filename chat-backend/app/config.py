@@ -13,11 +13,9 @@ from app.db import (
     WorkspaceSchema,
     TempFilesSchema,
 )
-from app.libs.chat import ChatFile
+from app.libs._chat import ChatState, AgenticKeywordMaker, ChatFile
 from app.libs.expected import Expected
 import pathlib
-
-from app.libs.file_reader import file_reader
 
 
 class ConfigError(RuntimeError):
@@ -98,6 +96,75 @@ class Settings(BaseSettings):
             return model.transform(
                 Agent, lambda model: Agent(model=model, system_prompt=f.read())
             )
+
+    def get_keyword_agent(self):
+        model = self.get_model()
+        with open(self.prompt_dir() / "publication.md", "r") as f:
+            return model.transform(
+                Agent,
+                lambda model: Agent(
+                    model=model, system_prompt=f.read().format(keyword_count=3)
+                ),
+            )
+
+    def get_chat_system_prompt(self):
+        with open(self.prompt_dir() / "chat.md", "r") as f:
+            return f.read()
+
+    def get_chat_agent(self, state: ChatState):
+        model = self.get_model()
+        with open(self.prompt_dir() / "chat.md", "r") as f:
+            return model.transform(
+                Agent,
+                lambda model: Agent(
+                    model=model,
+                    tools=[
+                        Tool(
+                            state.list_file,
+                            name="ls",
+                            description="List all files in the user filesystem",
+                            strict=True,
+                            max_retries=1,
+                        ),
+                        Tool(
+                            state.read_file,
+                            name="read_file",
+                            description="Read a file in the current filesystem",
+                            strict=True,
+                            max_retries=1,
+                        ),
+                        Tool(
+                            state.query_publications_length,
+                            name="query_publications_length",
+                            description="Get the length of the current obtained publications",
+                            strict=True,
+                            max_retries=1,
+                        ),
+                        Tool(
+                            state.query_publications,
+                            name="query_publications",
+                            description="Queries publications, call get_publication to read the contents of queried publications.",
+                            strict=True,
+                            max_retries=1,
+                        ),
+                        Tool(
+                            state.get_publications,
+                            name="get_publications",
+                            description=(
+                                "Retrieve cached publication entries by index."
+                            ),
+                            strict=True,
+                            max_retries=1,
+                        ),
+                    ],
+                    system_prompt=f.read(),
+                ),
+            )
+
+    def get_keyword_maker(self):
+        return self.get_keyword_agent().transform(
+            AgenticKeywordMaker, lambda a: AgenticKeywordMaker(a)
+        )
 
     def initialise_database(self):
         with self.get_db_conn() as conn:
