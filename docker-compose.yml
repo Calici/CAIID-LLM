@@ -25,7 +25,6 @@ services:
     build:
       context: .
       dockerfile: dockerfile.llama
-      platforms: ["linux/amd64"]
     ports:
       - "8080:8080"
     volumes:
@@ -37,3 +36,4 @@ services:
       - LLAMA_ARG_NO_WEBUI=true
       - LLAMA_ARG_CONTEXT_SHIFT=true
       - LLAMA_ARG_CTX_SIZE=32768
+      - LLAMA_ARG_JINJA=true
