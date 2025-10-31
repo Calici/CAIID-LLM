@@ -24,18 +24,4 @@ RUN cmake -S . -B build \
         -DLLAMA_CURL=OFF \
         -G Ninja \
     && cmake --build build --config Release
-
-FROM nvidia/cuda:12.6.2-runtime-ubuntu24.04 AS runtime
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /opt/llama.cpp/build/bin/llama-server /usr/local/bin/llama-server
-
-EXPOSE 8000
-
-ENTRYPOINT ["/usr/local/bin/llama-server", "--jinja"]
+ENTRYPOINT ["/opt/llama.cpp/build/bin/llama-server"]
