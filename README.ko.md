@@ -8,10 +8,15 @@ Drug Researcher는 FastAPI 백엔드, Next.js 인터페이스, 선택적인 로�
 - 저장소를 서브모듈까지 포함해 클론합니다: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite 모드 빠른 시작
-1. 프로젝트 루트에서 `docker compose up chat-backend chat-frontend` 명령을 실행합니다.
+1. 터미널에서 다음 명령을 순서대로 실행합니다.
+   ```sh
+   git clone https://github.com/Calici/caiid-llm --recurse-submodules
+   cd caiid-llm
+   docker compose up chat-backend chat-frontend
+   ```
+   Docker Compose v1만 지원되는 환경이라면 마지막 줄 대신 `docker-compose up chat-backend chat-frontend`를 사용하세요.
 2. 서비스 준비 로그가 보이면 브라우저에서 `http://localhost:3000`을 열어 바로 사용합니다.  
    종료할 때는 터미널에서 `Ctrl+C`를 누릅니다.
-3. Docker Compose v1을 사용하는 구버전 Docker 환경이라면 `docker compose` 대신 `docker-compose up chat-backend chat-frontend`를 실행하세요.
 
 ## 환경 변수와 포트 오버라이드
 

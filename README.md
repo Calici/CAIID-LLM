@@ -8,7 +8,13 @@ Drug Researcher bundles a FastAPI backend, a Next.js interface, and an optional 
 - Clone the repository with submodules: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite Mode Quickstart
-1. From the project root run `docker compose up chat-backend chat-frontend` (or `docker-compose up chat-backend chat-frontend` if the v2 CLI is unavailable).
+1. Run the following commands:
+   ```sh
+   git clone https://github.com/Calici/caiid-llm --recurse-submodules
+   cd caiid-llm
+   docker compose up chat-backend chat-frontend
+   ```
+   If your Docker installation only supports the legacy CLI, replace the last line with `docker-compose up chat-backend chat-frontend`.
 2. When the services report they are ready, open `http://localhost:3000` in your browser; press `Ctrl+C` in the terminal when you are done.
 
 ## Environment & Port Overrides
