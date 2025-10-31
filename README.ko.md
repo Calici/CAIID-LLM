@@ -5,7 +5,7 @@ Drug Researcher는 FastAPI 백엔드, Next.js 인터페이스, 선택적인 로�
 ## 사전 준비
 - Docker 24+ 및 Compose v2
 - Heavy 모드 옵션: NVIDIA Container Toolkit( GPU 가속 LLaMA 서버용)
-- 저장소를 서브모듈까지 포함해 클론합니다: `git clone https://github.com/Calici/mindblowing-llm --recurse-submodules`
+- 저장소를 서브모듈까지 포함해 클론합니다: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite 모드 빠른 시작
 1. 프로젝트 루트에서 백엔드가 필요로 하는 시크릿을 export 합니다(예: `export OPENAI_API_KEY=sk-...`).

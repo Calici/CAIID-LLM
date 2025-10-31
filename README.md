@@ -5,7 +5,7 @@ Drug Researcher bundles a FastAPI backend, a Next.js interface, and an optional 
 ## Prerequisites
 - Docker 24+ with Compose v2
 - Optional: NVIDIA container runtime for the Heavy mode (GPU-accelerated LLaMA server)
-- Clone the repository with submodules: `git clone https://github.com/Calici/mindblowing-llm --recurse-submodules`
+- Clone the repository with submodules: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite Mode Quickstart
 1. From the project root, export any required secrets for the backend—for example `export OPENAI_API_KEY=sk-...`.
