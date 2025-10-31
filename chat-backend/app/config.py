@@ -115,6 +115,13 @@ class Settings(BaseSettings):
                 ),
             )
 
+    def get_continuator_agent(self):
+        model = self.get_model()
+        with open(self.prompt_dir() / "continuation.md", "r") as f:
+            return model.transform(
+                Agent, lambda model: Agent(model=model, system_prompt=f.read())
+            )
+
     def get_chat_system_prompt(self):
         with open(self.prompt_dir() / "chat.md", "r") as f:
             return f.read()

@@ -1,6 +1,13 @@
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException
+from pydantic import TypeAdapter
 from pydantic_ai.agent import Agent
+from app.libs._chat import (
+    AgenticKeywordMaker,
+    BlankKeywordMaker,
+    ChatMessages,
+    ChatState,
+)
 from app.libs.expected import Expected
 from app.config import settings, ConfigError
 from app.db import WorkspaceSchema, TempFilesSchema
@@ -31,13 +38,29 @@ async def create_file_summary(content: str):
     )
 
 
+async def create_continuation(messages: ChatMessages):
+    async def x(kw_maker: AgenticKeywordMaker):
+        return await kw_maker.get_keywords(messages)
+
+    return (
+        await settings.get_continuator_agent()
+        .transform(AgenticKeywordMaker, lambda agent: AgenticKeywordMaker(agent))
+        .atransform(list, x)
+    )
+
+
 @router.get("/agent.topic_maker/{workspace_uuid}")
 async def topic_maker(workspace_uuid: str) -> str:
     with settings.get_db_conn() as conn:
         record = WorkspaceSchema.get_by_uuid(conn, workspace_uuid)
     if record is None:
         raise HTTPException(status_code=404, detail="Workspace not found")
-    chat_state = record.load_state(settings.chat_dir(), settings.data_path(), [])
+    chat_state = ChatState.load(
+        record.chat_path(settings.chat_dir()),
+        settings.data_path(),
+        BlankKeywordMaker(),
+        [],
+    )
     history_xml = chat_state.messages.to_xml()
     topic = await create_topic_from_prompt(history_xml)
     if not topic.has_value():
@@ -62,3 +85,21 @@ async def summarise_file(temp_file_uuid: str) -> str:
     if not summary.has_value():
         raise HTTPException(status_code=412, detail=str(summary.error()))
     return summary.value()
+
+
+@router.get("/agent.continuation/{workspace_uuid}")
+async def continue_convo(workspace_uuid: str) -> list[str]:
+    with settings.get_db_conn() as conn:
+        record = WorkspaceSchema.get_by_uuid(conn, workspace_uuid)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Temporary file not found")
+    chat_state = ChatState.load(
+        record.chat_path(settings.chat_dir()),
+        settings.data_path(),
+        BlankKeywordMaker(),
+        [],
+    )
+    res = await create_continuation(chat_state.messages)
+    if not res.has_value():
+        raise HTTPException(status_code=412, detail=str(res.error()))
+    return res.value()

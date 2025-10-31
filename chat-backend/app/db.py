@@ -1,17 +1,10 @@
 from __future__ import annotations
-from typing import Annotated, Protocol, final, TypeVar
-from pydantic import BaseModel, ConfigDict, PlainSerializer
+from typing import Protocol, final, TypeVar
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 import sqlite3
 import uuid
 import pathlib
-from app.libs.chat import (
-    BlankKeywordMaker,
-    ChatFile,
-    ChatMessages,
-    ChatState,
-    KeywordMaker,
-)
 from sqlalchemy import literal
 from sqlalchemy.dialects.sqlite import dialect as sqlite_dialect
 import contextlib
