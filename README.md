@@ -8,12 +8,8 @@ Drug Researcher bundles a FastAPI backend, a Next.js interface, and an optional 
 - Clone the repository with submodules: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite Mode Quickstart
-1. From the project root, export any required secrets for the backend—for example `export OPENAI_API_KEY=sk-...`.
-2. (Optional) Create a `.env` file to override ports or storage paths, then save it alongside `docker-compose.yml`.
-3. Build and start the frontend and backend only:  
-   `docker compose up --build chat-backend chat-frontend`
-4. Open `http://localhost:3000` in your browser and wait for API responses from `http://localhost:8000`.
-5. When finished, stop the stack with `Ctrl+C` and clean up containers using `docker compose down`.
+1. From the project root run `docker compose up chat-backend chat-frontend` (or `docker-compose up chat-backend chat-frontend` if the v2 CLI is unavailable).
+2. When the services report they are ready, open `http://localhost:3000` in your browser; press `Ctrl+C` in the terminal when you are done.
 
 ## Environment & Port Overrides
 

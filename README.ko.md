@@ -8,12 +8,10 @@ Drug Researcher는 FastAPI 백엔드, Next.js 인터페이스, 선택적인 로�
 - 저장소를 서브모듈까지 포함해 클론합니다: `git clone https://github.com/Calici/caiid-llm --recurse-submodules`
 
 ## Lite 모드 빠른 시작
-1. 프로젝트 루트에서 백엔드가 필요로 하는 시크릿을 export 합니다(예: `export OPENAI_API_KEY=sk-...`).
-2. (선택) 포트나 저장 경로를 바꾸려면 `.env` 파일을 만들어 `docker-compose.yml`과 같은 위치에 저장합니다.
-3. 프런트엔드와 백엔드만 빌드 및 기동합니다.  
-   `docker compose up --build chat-backend chat-frontend`
-4. 브라우저에서 `http://localhost:3000`을 열고 백엔드가 `http://localhost:8000`에서 응답하는지 확인합니다.
-5. 종료할 때는 `Ctrl+C`로 중단한 뒤 `docker compose down`으로 컨테이너를 정리합니다.
+1. 프로젝트 루트에서 `docker compose up chat-backend chat-frontend` 명령을 실행합니다.
+2. 서비스 준비 로그가 보이면 브라우저에서 `http://localhost:3000`을 열어 바로 사용합니다.  
+   종료할 때는 터미널에서 `Ctrl+C`를 누릅니다.
+3. Docker Compose v1을 사용하는 구버전 Docker 환경이라면 `docker compose` 대신 `docker-compose up chat-backend chat-frontend`를 실행하세요.
 
 ## 환경 변수와 포트 오버라이드
 
