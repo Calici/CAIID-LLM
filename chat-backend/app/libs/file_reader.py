@@ -7,15 +7,10 @@ import subprocess
 import zipfile
 import xml.etree.ElementTree as ET
 from typing import Protocol, final
-from xml.sax.saxutils import escape
 
 from docx import Document
 
 from app.libs.expected import Expected
-
-
-def _escape_attr(value: str) -> str:
-    return escape(value, {'"': "&quot;"})
 
 
 @final
@@ -111,11 +106,13 @@ class CSVReader:
 
     @staticmethod
     def build_table_xml(headers: list[str], rows: list[list[str]]) -> str:
-        header_text = ", ".join(escape(str(value)) for value in headers)
-        row_fragments = "".join(
-            f"<row>{', '.join(escape(str(cell)) for cell in row)}</row>" for row in rows
-        )
-        return f"<table><header>{header_text}</header>{row_fragments}</table>"
+        table_elem = ET.Element("table")
+        header_elem = ET.SubElement(table_elem, "header")
+        header_elem.text = ", ".join(str(value) for value in headers)
+        for row in rows:
+            row_elem = ET.SubElement(table_elem, "row")
+            row_elem.text = ", ".join(str(cell) for cell in row)
+        return ET.tostring(table_elem, encoding="unicode")
 
 
 @final
@@ -142,9 +139,9 @@ class XLSXReader:
                 sheet_fragments: list[str] = []
                 for sheet_name, sheet_path in sheet_map:
                     table_xml = self._sheet_to_table(zf, sheet_path, shared_strings)
-                    sheet_fragments.append(
-                        f'<sheet name="{_escape_attr(sheet_name)}">{table_xml}</sheet>'
-                    )
+                    sheet_elem = ET.Element("sheet", {"name": str(sheet_name)})
+                    sheet_elem.append(ET.fromstring(table_xml))
+                    sheet_fragments.append(ET.tostring(sheet_elem, encoding="unicode"))
                 return "".join(sheet_fragments)
         except zipfile.BadZipFile as exc:
             raise FileReaderError("xlsx read error") from exc
@@ -209,41 +206,23 @@ class XLSXReader:
         rows = sheet_data_node.findall(f"{self.MAIN_NAMESPACE}row")
         if not rows:
             raise FileReaderError("xlsx missing header row")
-        header_values = self._extract_row_values(rows[0], shared_strings)
-        if not any(value.strip() for value in header_values):
-            raise FileReaderError("xlsx missing header row")
-        data_rows: list[list[str]] = []
-        width = len(header_values)
-        for row_elem in rows[1:]:
-            row_values = self._extract_row_values(row_elem, shared_strings, width)
-            if len(row_values) < width:
-                row_values.extend([""] * (width - len(row_values)))
-            elif len(row_values) > width:
-                row_values = row_values[:width]
-            data_rows.append(row_values)
-        return CSVReader.build_table_xml(header_values, data_rows)
-
-    def _extract_row_values(
-        self,
-        row_elem: ET.Element,
-        shared_strings: list[str],
-        width: int | None = None,
-    ) -> list[str]:
-        cells = row_elem.findall(f"{self.MAIN_NAMESPACE}c")
-        if not cells:
-            return [""] * width if width is not None else []
-        values_map: dict[int, str] = {}
+        header_row = rows[0]
+        headers_map: dict[int, str] = {}
         max_index = -1
-        for cell in cells:
+        for cell in header_row.findall(f"{self.MAIN_NAMESPACE}c"):
             index = self._column_index(cell.get("r", ""))
             if index is None:
                 continue
             value = self._cell_text(cell, shared_strings).strip()
-            values_map[index] = value
+            headers_map[index] = value
             if index > max_index:
                 max_index = index
-        length = width if width is not None else (max_index + 1 if max_index >= 0 else 0)
-        return [values_map.get(i, "") for i in range(length)]
+        if max_index < 0:
+            raise FileReaderError("xlsx missing header row")
+        header_values = [headers_map.get(i, "") for i in range(max_index + 1)]
+        if not any(value.strip() for value in header_values):
+            raise FileReaderError("xlsx missing header row")
+        return CSVReader.build_table_xml(header_values, [])
 
     def _column_index(self, cell_ref: str) -> int | None:
         if not cell_ref:
