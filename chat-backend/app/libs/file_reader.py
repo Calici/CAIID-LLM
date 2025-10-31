@@ -1,11 +1,21 @@
 from __future__ import annotations
-from typing import Protocol, final
-from app.libs.expected import Expected
-from docx import Document
+
 import asyncio
+import csv
 import pathlib
 import subprocess
-import csv
+import zipfile
+import xml.etree.ElementTree as ET
+from typing import Protocol, final
+from xml.sax.saxutils import escape
+
+from docx import Document
+
+from app.libs.expected import Expected
+
+
+def _escape_attr(value: str) -> str:
+    return escape(value, {'"': "&quot;"})
 
 
 @final
@@ -91,14 +101,218 @@ class CSVReader:
             with open(p, "r") as f:
                 reader = csv.reader(f)
                 headers = next(reader)
-                return _FileReader.create_expected(f"headers: {', '.join(headers)}")
+                rows = list(reader)
+                payload = self.build_table_xml(headers, rows)
+                return _FileReader.create_expected(payload)
         except IOError:
             return _FileReader.create_expected(FileReaderError("file read error"))
+        except StopIteration:
+            return _FileReader.create_expected(FileReaderError("csv header missing"))
+
+    @staticmethod
+    def build_table_xml(headers: list[str], rows: list[list[str]]) -> str:
+        header_text = ", ".join(escape(str(value)) for value in headers)
+        row_fragments = "".join(
+            f"<row>{', '.join(escape(str(cell)) for cell in row)}</row>" for row in rows
+        )
+        return f"<table><header>{header_text}</header>{row_fragments}</table>"
+
+
+@final
+class XLSXReader:
+    MAIN_NAMESPACE = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+    REL_NAMESPACE = "{http://schemas.openxmlformats.org/package/2006/relationships}"
+
+    async def read_file(self, p: pathlib.Path) -> Expected[str, FileReaderError]:
+        try:
+            xml_payload = await asyncio.to_thread(self._convert_workbook_to_xml, p)
+            return _FileReader.create_expected(xml_payload)
+        except FileReaderError as err:
+            return _FileReader.create_expected(err)
+        except Exception:
+            return _FileReader.create_expected(FileReaderError("xlsx read error"))
+
+    def _convert_workbook_to_xml(self, path: pathlib.Path) -> str:
+        try:
+            with zipfile.ZipFile(path) as zf:
+                sheet_map = self._load_sheet_map(zf)
+                if not sheet_map:
+                    raise FileReaderError("xlsx missing worksheet")
+                shared_strings = self._load_shared_strings(zf)
+                sheet_fragments: list[str] = []
+                for sheet_name, sheet_path in sheet_map:
+                    table_xml = self._sheet_to_table(zf, sheet_path, shared_strings)
+                    sheet_fragments.append(
+                        f'<sheet name="{_escape_attr(sheet_name)}">{table_xml}</sheet>'
+                    )
+                return "".join(sheet_fragments)
+        except zipfile.BadZipFile as exc:
+            raise FileReaderError("xlsx read error") from exc
+        except ET.ParseError as exc:
+            raise FileReaderError("xlsx read error") from exc
+
+    def _load_sheet_map(self, zf: zipfile.ZipFile) -> list[tuple[str, str]]:
+        try:
+            workbook_data = zf.read("xl/workbook.xml")
+        except KeyError as exc:
+            raise FileReaderError("xlsx missing workbook") from exc
+        workbook_root = ET.fromstring(workbook_data)
+        rels = self._load_relationships(zf)
+        sheets: list[tuple[str, str]] = []
+        sheets_parent = workbook_root.find(f"{self.MAIN_NAMESPACE}sheets")
+        if sheets_parent is None:
+            return sheets
+        for sheet in sheets_parent.findall(f"{self.MAIN_NAMESPACE}sheet"):
+            name = sheet.get("name", "")
+            rel_id = sheet.get(
+                "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+            )
+            if not rel_id:
+                continue
+            target = rels.get(rel_id)
+            if target is None:
+                continue
+            if target.startswith("/"):
+                sheet_path = target.lstrip("/")
+            elif target.startswith("xl/"):
+                sheet_path = target
+            else:
+                sheet_path = f"xl/{target}"
+            sheets.append((name, sheet_path))
+        return sheets
+
+    def _load_relationships(self, zf: zipfile.ZipFile) -> dict[str, str]:
+        try:
+            rels_data = zf.read("xl/_rels/workbook.xml.rels")
+        except KeyError:
+            return {}
+        rels_root = ET.fromstring(rels_data)
+        relationships: dict[str, str] = {}
+        for rel in rels_root.findall(f"{self.REL_NAMESPACE}Relationship"):
+            rel_id = rel.get("Id")
+            target = rel.get("Target")
+            if rel_id and target:
+                relationships[rel_id] = target
+        return relationships
+
+    def _sheet_to_table(
+        self, zf: zipfile.ZipFile, sheet_path: str, shared_strings: list[str]
+    ) -> str:
+        try:
+            sheet_data = zf.read(sheet_path)
+        except KeyError as exc:
+            raise FileReaderError("xlsx missing worksheet") from exc
+        sheet_root = ET.fromstring(sheet_data)
+        sheet_data_node = sheet_root.find(f"{self.MAIN_NAMESPACE}sheetData")
+        if sheet_data_node is None:
+            raise FileReaderError("xlsx missing sheet data")
+        rows = sheet_data_node.findall(f"{self.MAIN_NAMESPACE}row")
+        if not rows:
+            raise FileReaderError("xlsx missing header row")
+        header_values = self._extract_row_values(rows[0], shared_strings)
+        if not any(value.strip() for value in header_values):
+            raise FileReaderError("xlsx missing header row")
+        data_rows: list[list[str]] = []
+        width = len(header_values)
+        for row_elem in rows[1:]:
+            row_values = self._extract_row_values(row_elem, shared_strings, width)
+            if len(row_values) < width:
+                row_values.extend([""] * (width - len(row_values)))
+            elif len(row_values) > width:
+                row_values = row_values[:width]
+            data_rows.append(row_values)
+        return CSVReader.build_table_xml(header_values, data_rows)
+
+    def _extract_row_values(
+        self,
+        row_elem: ET.Element,
+        shared_strings: list[str],
+        width: int | None = None,
+    ) -> list[str]:
+        cells = row_elem.findall(f"{self.MAIN_NAMESPACE}c")
+        if not cells:
+            return [""] * width if width is not None else []
+        values_map: dict[int, str] = {}
+        max_index = -1
+        for cell in cells:
+            index = self._column_index(cell.get("r", ""))
+            if index is None:
+                continue
+            value = self._cell_text(cell, shared_strings).strip()
+            values_map[index] = value
+            if index > max_index:
+                max_index = index
+        length = width if width is not None else (max_index + 1 if max_index >= 0 else 0)
+        return [values_map.get(i, "") for i in range(length)]
+
+    def _column_index(self, cell_ref: str) -> int | None:
+        if not cell_ref:
+            return None
+        letters = []
+        for char in cell_ref:
+            if char.isalpha():
+                letters.append(char.upper())
+            else:
+                break
+        if not letters:
+            return None
+        index = 0
+        for char in letters:
+            index = index * 26 + (ord(char) - ord("A") + 1)
+        return index - 1
+
+    def _load_shared_strings(self, zf: zipfile.ZipFile) -> list[str]:
+        try:
+            data = zf.read("xl/sharedStrings.xml")
+        except KeyError:
+            return []
+        try:
+            root = ET.fromstring(data)
+        except ET.ParseError as exc:
+            raise FileReaderError("xlsx read error") from exc
+        strings: list[str] = []
+        for si in root.findall(f"{self.MAIN_NAMESPACE}si"):
+            pieces = [
+                node.text or ""
+                for node in si.findall(f".//{self.MAIN_NAMESPACE}t")
+            ]
+            strings.append("".join(pieces))
+        return strings
+
+    def _cell_text(self, cell: ET.Element, shared_strings: list[str]) -> str:
+        cell_type = cell.get("t")
+        if cell_type == "s":
+            value_node = cell.find(f"{self.MAIN_NAMESPACE}v")
+            if value_node is None or value_node.text is None:
+                return ""
+            try:
+                index = int(value_node.text)
+            except ValueError:
+                return ""
+            if 0 <= index < len(shared_strings):
+                return shared_strings[index]
+            return ""
+        if cell_type == "inlineStr":
+            inline = cell.find(f"{self.MAIN_NAMESPACE}is")
+            if inline is None:
+                return ""
+            parts = [
+                node.text or ""
+                for node in inline.findall(f".//{self.MAIN_NAMESPACE}t")
+            ]
+            return "".join(parts)
+        value_node = cell.find(f"{self.MAIN_NAMESPACE}v")
+        if value_node is None or value_node.text is None:
+            return ""
+        if cell_type == "b":
+            return "TRUE" if value_node.text == "1" else "FALSE"
+        return value_node.text
 
 
 file_reader: FileReader = (
     ExtReader(PlainTextReader())
     .add_reader(".doc", DocxReader())
     .add_reader(".docx", DocxReader())
+    .add_reader(".xlsx", XLSXReader())
     .add_reader(".pdf", PDFReader())
 )
