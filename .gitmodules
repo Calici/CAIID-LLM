@@ -3,4 +3,4 @@
 	url = https://github.com/ggerganov/llama.cpp
 [submodule "chat-frontend"]
 	path = chat-frontend
-	url = github.com:Calici/CAIID_LLM_Frontend
+	url = https://github.com/Calici/CAIID_LLM_Frontend
