@@ -16,6 +16,7 @@ from app.db import (
 from app.libs._chat import ChatState, AgenticKeywordMaker, ChatFile
 from app.libs.expected import Expected
 import pathlib
+import os
 
 
 class ConfigError(RuntimeError):
@@ -29,6 +30,7 @@ class Settings(BaseSettings):
 
     db_path: pathlib.Path
     root_path: pathlib.Path
+    assets_path: pathlib.Path
 
     def data_path(self) -> pathlib.Path:
         directory = self.root_path / "root"
@@ -41,7 +43,7 @@ class Settings(BaseSettings):
         return directory
 
     def prompt_dir(self) -> pathlib.Path:
-        return pathlib.Path("assets") / "system_prompt"
+        return self.assets_path / "system_prompt"
 
     def chat_dir(self) -> pathlib.Path:
         directory = self.root_path / "chat"
@@ -205,6 +207,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings(
-    db_path=pathlib.Path("data/local.db"), root_path=pathlib.Path("data")
+    db_path=pathlib.Path(os.environ.get("APP_DB_PATH", "data/local.db")),
+    root_path=pathlib.Path(os.environ.get("APP_DATA_PATH", "data")),
+    assets_path=pathlib.Path(os.environ.get("APP_ASSETS_PATH", "assets")),
 )
 settings.set_up()

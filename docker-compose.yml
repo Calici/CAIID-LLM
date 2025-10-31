@@ -1,53 +1,39 @@
 services:
-  db:
-    image: postgres:14
-    container_name: chat-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
   chat-backend:
     build:
       context: ./chat-backend
       dockerfile: dockerfile
-    container_name: chat-backend
-    environment:
-      DB_HOST: db
-      DB_NAME: postgres
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_PORT: "5432"
-      OPENAI_API_KEY: ""
-      OPENAI_API_PROVIDER: "http://llama:8000"
-      OPENAI_API_MODEL: llama4
     ports:
       - "8000:8000"
-    depends_on:
-      - db
-      - llama
-
+    environment:
+      - APP_DB_PATH=/data/local.db
+      - APP_DATA_PATH=/data
+      - APP_ASSETS_PATH=/assets
+    volumes:
+      - ./data:/data
   chat-frontend:
     build:
       context: ./chat-frontend
-      dockerfile: Dockerfile
-    container_name: chat-frontend
-    environment:
-      NEXT_PUBLIC_BACKEND_URL: http://chat-backend:8000
+      dockerfile: dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
     ports:
       - "3000:3000"
     depends_on:
       - chat-backend
-      - llama
-
   llama:
     build:
       context: .
       dockerfile: dockerfile.llama
-    container_name: llama
+      platforms: ["linux/amd64"]
     ports:
-      - "8000:8000"
+      - "8080:8080"
+    volumes:
+      - ./models/gemma-3-12b-it/gemma-3-12B-it-Q4.gguf:/llm-models/model.gguf
+    environment:
+      - LLAMA_ARG_HOST=0.0.0.0
+      - LLAMA_ARG_PORT=8080
+      - LLAMA_ARG_MODEL=/llm-models/model.gguf
+      - LLAMA_ARG_NO_WEBUI=true
+      - LLAMA_ARG_CONTEXT_SHIFT=true
+      - LLAMA_ARG_CTX_SIZE=32768
