@@ -14,7 +14,7 @@ from app.libs._chat.chat_message import (
     ToolCallCompleteMessage,
     ToolCallMessage,
 )
-from app.libs._chat import BlankKeywordMaker, ChatState, FlatChatState
+from app.libs._chat import BlankKeywordMaker, ChatMessages, ChatState, FlatChatState
 from app.libs.drug_query import PublicationResult
 from app.routes.agent import create_topic_from_prompt
 
@@ -193,7 +193,9 @@ async def chat_with_ai(payload: WorkspaceChatPayload):
             ChatState.save(record.chat_path(settings.chat_dir()), chat_state)
         else:
             is_new = True
-            name = await create_topic_from_prompt(payload.user_prompt)
+            name = await create_topic_from_prompt(
+                ChatMessages.new(payload.user_prompt).to_xml()
+            )
             if not name.has_value():
                 raise HTTPException(
                     status_code=412, detail=f"name agent: {str(name.error())}"
