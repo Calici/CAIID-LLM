@@ -19,6 +19,10 @@ def _trim_check_blank(value: str) -> str:
     return trimmed
 
 
+def sanitise_summary(value: str) -> str:
+    return "".join([v for v in value if v not in ['"', "`", "'"]])
+
+
 class TempUploadPayload(BaseModel):
     name: Annotated[str, AfterValidator(_trim_check_blank)]
     file: UploadFile
@@ -32,7 +36,7 @@ async def temp_upload(payload: Annotated[TempUploadPayload, Form()]):
         temp_record = TempFilesSchema.get_by_name(get_db_conn, payload.name)
         if temp_record is None:
             temp_record = TempFilesSchema.create(
-                name=save_path.name, extension=save_path.suffix
+                name=sanitise_summary(save_path.name), extension=save_path.suffix
             )
             _ = get_db_conn.run_query(temp_record.insert_sql())
         else:
@@ -57,7 +61,10 @@ async def confirm_upload(temp_file_uuid: str, payload: ConfirmUploadPayload):
         cur_record = FilesSchema.get_by_name(get_db_conn, payload.name)
         if cur_record is not None:
             raise HTTPException(status_code=409, detail="file exists. change name ?")
-        record = FilesSchema.create(name=payload.name, summary=payload.summary)
+        record = FilesSchema.create(
+            name=sanitise_summary(payload.name),
+            summary=sanitise_summary(payload.summary),
+        )
         _ = get_db_conn.run_query(record.insert_sql())
         _ = shutil.move(
             settings.tmp_path() / temp_record.name, settings.data_path() / record.name
