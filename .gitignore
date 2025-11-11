@@ -14,3 +14,4 @@ chat-backend/.poetry
 .gitignore
 models
 data
+export

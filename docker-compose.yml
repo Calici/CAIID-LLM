@@ -23,9 +23,8 @@ services:
       - chat-backend
   llama:
     build:
-      context: .
-      dockerfile: dockerfile.llama
-    runtime: nvidia
+      context: ./llama-cpp
+      dockerfile: ../dockerfile.llama
     ports:
       - "8080:8080"
     volumes:
