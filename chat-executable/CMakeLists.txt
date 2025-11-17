@@ -9,7 +9,6 @@ option (
 )
 set (DRUG_SEARCH_EXECUTABLE_NAME "Drug Search")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-generic)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-asio)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-process)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-cli)
 
