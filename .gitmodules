@@ -4,3 +4,15 @@
 [submodule "chat-frontend"]
 	path = chat-frontend
 	url = https://github.com/Calici/CAIID_LLM_Frontend
+[submodule "chat-executable/libs/jowi-cli"]
+	path = chat-executable/libs/jowi-cli
+	url = https://github.com/jowillianto/jowi-cli
+[submodule "chat-executable/libs/jowi-generic"]
+	path = chat-executable/libs/jowi-generic
+	url = https://github.com/jowillianto/jowi-generic
+[submodule "chat-executable/libs/jowi-process"]
+	path = chat-executable/libs/jowi-process
+	url = https://github.com/jowillianto/jowi-process
+[submodule "chat-executable/build/libs/libs/jowi-asio"]
+	path = chat-executable/libs/jowi-asio
+	url = https://github.com/jowillianto/jowi-asio
