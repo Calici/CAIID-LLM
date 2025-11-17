@@ -226,7 +226,7 @@ int main(int argc, const char **argv, const char **envp) {
     .help("If the docker containers should be rebuild on startup")
     .as_flag();
   app.parse_args(false);
-  auto app_dir = fs::path{app.args().arg()}.parent_path().parent_path().parent_path();
+  auto app_dir = fs::current_path();
   state.emplace(app_dir);
   state->data_dir = app.args().first_of("--data").transform(cli::parse_arg<fs::path>);
   app.expect(build_containers(state.value(), true));

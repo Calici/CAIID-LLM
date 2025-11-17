@@ -39,20 +39,20 @@ elseif (APPLE)
         PRIVATE
             PLATFORM="APPLE"
             DEFAULT_DATA_DIR="/Library/Preferences/${DRUG_SEARCH_EXECUTABLE_NAME}/data"
-            DEFAULT_LLAMA_PATH="Contents/Resources/llama.cpp/llama-server"
-            DEFAULT_MODEL_PATH="Contents/Resources/llms/gemma-3-12B-it-Q4.gguf"
-            DEFAULT_BACKEND_PATH="Contents/Resources/chat-backend"
-            DEFAULT_FRONTEND_PATH="Contents/Resources/chat-frontend"
+            DEFAULT_LLAMA_PATH="llama.cpp/llama-server"
+            DEFAULT_MODEL_PATH="llms/gemma-3-12B-it-Q4.gguf"
+            DEFAULT_BACKEND_PATH="chat-backend"
+            DEFAULT_FRONTEND_PATH="chat-frontend"
     )
 elseif (UNIX)
     target_compile_definitions(main
         PRIVATE
             PLATFORM="UNIX"
-            DEFAULT_DATA_DIR="/Library/Preferences/${DRUG_SEARCH_EXECUTABLE_NAME}/data"
-            DEFAULT_LLAMA_PATH="Contents/Resources/llama.cpp/llama-server"
-            DEFAULT_MODEL_PATH="Contents/Resources/llms/gemma-3-12B-it-Q4.gguf"
-            DEFAULT_BACKEND_PATH="Contents/Resources/chat-backend"
-            DEFAULT_FRONTEND_PATH="Contents/Resources/chat-frontend"
+            DEFAULT_DATA_DIR="data"
+            DEFAULT_LLAMA_PATH="llama.cpp/llama-server"
+            DEFAULT_MODEL_PATH="llms/gemma-3-12B-it-Q4.gguf"
+            DEFAULT_BACKEND_PATH="chat-backend"
+            DEFAULT_FRONTEND_PATH="chat-frontend"
     )
 endif()
 
