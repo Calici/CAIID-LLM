@@ -26,6 +26,7 @@ RUN cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=OFF \
     -DLLAMA_BUILD_EXAMPLES=OFF \
     -DLLAMA_BUILD_SERVER=ON \
+    -DBUILD_SHARED_LIBS=OFF \
     -DGGML_CUDA=ON \
     -DLLAMA_CURL=ON \
     -G Ninja \

@@ -1,27 +1,31 @@
 #include <atomic>
-#include <chrono>
-#include <concepts>
 #include <csignal>
 #include <cstdlib>
-#include <exception>
 #include <expected>
 #include <filesystem>
 #include <format>
-#include <functional>
-#include <initializer_list>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
-#include <vector>
 import jowi.cli;
-import jowi.crogger;
 import jowi.process;
+import jowi.crogger;
 
 namespace cli = jowi::cli;
 namespace proc = jowi::process;
 namespace fs = std::filesystem;
+namespace log = jowi::crogger;
+
+struct FileCloser {
+  void operator()(std::FILE *f) {
+    if (f != nullptr) {
+      std::fclose(f);
+    }
+  }
+};
+
+std::unique_ptr<std::FILE, FileCloser> null_file{std::fopen("/dev/null", "w")};
 
 struct AppState {
   fs::path app_dir;
@@ -40,7 +44,7 @@ struct AppState {
   }
 
   fs::path resolved_data_path() const {
-    return data_dir.value_or(DEFAULT_DATA_DIR);
+    return data_dir.value_or(app_dir / DEFAULT_DATA_DIR);
   }
   fs::path backend_path() const {
     return app_dir / DEFAULT_BACKEND_PATH;
@@ -97,6 +101,7 @@ struct ProcessManager {
 
 std::expected<ProcessManager, proc::SubprocessError> run_stack(const AppState &state, bool heavy) {
   ProcessManager procs;
+  log::info(log::Message{"Spawning chat-backend"});
   auto backend_proc = proc::spawn(
     {"docker",
      "run",
@@ -108,16 +113,20 @@ std::expected<ProcessManager, proc::SubprocessError> run_stack(const AppState &s
      "drug-search-chat-backend"}
   );
   if (!backend_proc) {
+    log::error(log::Message{"Fail to spawn chat-backend"});
     return std::unexpected{backend_proc.error()};
   }
   procs.emplace_back(std::move(backend_proc).value());
+  log::info(log::Message{"Spawning chat-frontend"});
   auto frontend_proc =
     proc::spawn({"docker", "run", "--rm", "-p", "3000:3000", "drug-search-chat-frontend"});
-  if (!backend_proc) {
+  if (!frontend_proc) {
+    log::error(log::Message{"Fail to spawn chat-frontend"});
     return std::unexpected{frontend_proc.error()};
   }
   procs.emplace_back(std::move(frontend_proc).value());
   if (heavy) {
+    log::info(log::Message{"Spawning llama-cpp"});
     auto llama_proc = proc::spawn({
       state.resolved_llama_path().string(),
       "--host",
@@ -135,11 +144,43 @@ std::expected<ProcessManager, proc::SubprocessError> run_stack(const AppState &s
       std::to_string(state.llama_gpu_layers),
     });
     if (!llama_proc) {
+      log::error(log::Message{"Fail to spawn llama.cpp"});
       return std::unexpected{llama_proc.error()};
     }
     procs.emplace_back(std::move(llama_proc).value());
   }
+  log::info(log::Message{"Spawned chat-backend"});
+  log::info(log::Message{"Spawned chat-frontend"});
+  if (heavy) log::info(log::Message{"Spawned llama-cpp"});
   return std::expected<ProcessManager, proc::SubprocessError>{std::move(procs)};
+}
+
+std::expected<void, proc::SubprocessError> condition_load_image(
+  std::string_view img_name, const fs::path &load_path, bool force
+) {
+  return proc::run(
+           {"docker", "image", "inspect", img_name},
+           false,
+           fileno(null_file.get()),
+           std::nullopt,
+           fileno(null_file.get())
+  )
+    .transform([](auto res) { return res.exit_code() == 0; })
+    .and_then([&](bool exist) {
+      if (exist && !force) return std::expected<void, proc::SubprocessError>{};
+      return proc::run({"docker", "image", "load", "-i", load_path.c_str()}).transform([](auto) {});
+    });
+}
+
+std::expected<void, proc::SubprocessError> build_containers(const AppState &state, bool update) {
+  return condition_load_image(
+           FRONTEND_CONTAINER_NAME, state.app_dir / DEFAULT_FRONTEND_PATH, update
+  )
+    .and_then([&]() {
+      return condition_load_image(
+        BACKEND_CONTAINER_NAME, state.app_dir / DEFAULT_BACKEND_PATH, update
+      );
+    });
 }
 
 struct HeavyAction {
@@ -158,7 +199,7 @@ struct HeavyAction {
       .optional();
     app.add_argument("--offload_layers")
       .help(
-        "The amount of layers to offload to GPU. To offload all, just put a big number. Default: All"
+        "The amount of layers to offload to GPU. To offload all, just put a big number. Default: 100"
       )
       .require_value()
       .optional();
@@ -177,7 +218,7 @@ struct HeavyAction {
     );
     state->llama_context_size =
       app.expect(app.args().first_of("--context_size").transform(cli::parse_arg<int>).value_or(0));
-    auto procs = app.expect(run_stack(state.value(), true));
+    auto procs = cli::App::expect(run_stack(state.value(), true));
     state->interrupted.wait(false, std::memory_order_acquire);
   }
 };
@@ -188,31 +229,6 @@ struct LiteAction {
     state->interrupted.wait(false, std::memory_order_acquire);
   }
 };
-
-std::expected<bool, proc::SubprocessError> check_image(std::string_view name) {
-  return proc::run({"docker", "image", "inspect", name}, false).transform([](auto res) {
-    return res.exit_code() == 0;
-  });
-}
-
-std::expected<void, proc::SubprocessError> build_containers(const AppState &state, bool update) {
-  return proc::run({"docker",
-                    "build",
-                    "-f",
-                    state.app_dir / DEFAULT_FRONTEND_PATH / "dockerfile",
-                    "--build-arg",
-                    "NEXT_PUBLIC_API_BASE_URL=http://localhost:8000",
-                    state.app_dir / DEFAULT_FRONTEND_PATH})
-    .transform([&](auto) {})
-    .and_then([&]() {
-      return proc::run({"docker",
-                        "build",
-                        "-f",
-                        state.app_dir / DEFAULT_BACKEND_PATH / "dockerfile",
-                        state.app_dir / DEFAULT_BACKEND_PATH})
-        .transform([&](auto) {});
-    });
-}
 
 int main(int argc, const char **argv, const char **envp) {
   proc::SubprocessEnv::init(envp);
@@ -229,7 +245,14 @@ int main(int argc, const char **argv, const char **envp) {
   auto app_dir = fs::current_path();
   state.emplace(app_dir);
   state->data_dir = app.args().first_of("--data").transform(cli::parse_arg<fs::path>);
-  app.expect(build_containers(state.value(), true));
+  log::info(log::Message{"Data Directory:  {}", state->resolved_data_path().c_str()});
+  log::info(
+    log::Message{
+      "Loading Application Container: {}",
+      app.args().contains("--update") ? "Force Update" : "Check and No Update"
+    }
+  );
+  cli::App::expect(build_containers(state.value(), app.args().contains("--update")));
   cli::ActionBuilder{app, "The mode to run the model for"}
     .add_action(
       "heavy", "Runs the Heavy Mode by also running a local llama.cpp server", HeavyAction{}
