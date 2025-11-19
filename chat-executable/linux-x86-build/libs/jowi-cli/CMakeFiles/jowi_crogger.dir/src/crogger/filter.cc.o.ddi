@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/filter.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.crogger:filter",
+          "source-path": "/app/libs/jowi-cli/src/crogger/filter.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.crogger:context"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

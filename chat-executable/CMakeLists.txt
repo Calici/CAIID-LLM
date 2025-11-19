@@ -33,7 +33,7 @@ target_compile_definitions(main
         DEFAULT_FRONTEND_PATH="chat-frontend.tar.gz"
 )
 
-if (CROSS_COMPILE_WSL)
+if (DRUG_SEARCH_CROSS_COMPILE_WSL)
     target_compile_definitions(main
         PRIVATE
             DEFAULT_LLAMA_PATH="llama.cpp/llama-server.exe"

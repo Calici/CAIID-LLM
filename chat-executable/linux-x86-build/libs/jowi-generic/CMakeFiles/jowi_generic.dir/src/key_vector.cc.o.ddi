@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/key_vector.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.generic:key_vector",
+          "source-path": "/app/libs/jowi-generic/src/key_vector.cc"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

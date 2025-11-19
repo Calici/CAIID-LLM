@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/arg_shortcut.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:arg_shortcut",
+          "source-path": "/app/libs/jowi-cli/src/arg_shortcut.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.cli:parse_error"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

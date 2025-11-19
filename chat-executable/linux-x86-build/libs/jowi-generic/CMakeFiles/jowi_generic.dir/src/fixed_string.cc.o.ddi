@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/fixed_string.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.generic:fixed_string",
+          "source-path": "/app/libs/jowi-generic/src/fixed_string.cc"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

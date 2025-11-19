@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/prec_fp.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.generic:prec_fp",
+          "source-path": "/app/libs/jowi-generic/src/prec_fp.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic:is_number"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

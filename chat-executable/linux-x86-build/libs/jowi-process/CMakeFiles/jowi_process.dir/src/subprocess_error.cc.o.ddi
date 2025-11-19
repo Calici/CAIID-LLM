@@ -1,0 +1,24 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-process/CMakeFiles/jowi_process.dir/src/subprocess_error.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.process:subprocess_error",
+          "source-path": "/app/libs/jowi-process/src/subprocess_error.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        },
+        {
+          "logical-name": "jowi.process:subprocess_result"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

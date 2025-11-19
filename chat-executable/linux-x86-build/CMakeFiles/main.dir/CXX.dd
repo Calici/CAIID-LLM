@@ -1,0 +1,3 @@
+ninja_dyndep_version = 1.0
+build CMakeFiles/main.dir/main.cc.o: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli.pcm libs/jowi-process/CMakeFiles/jowi_process.dir/jowi.process.pcm libs/jowi-cli/CMakeFiles/jowi_crogger.dir/jowi.crogger.pcm
+

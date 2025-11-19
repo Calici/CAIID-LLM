@@ -1,0 +1,43 @@
+ninja_dyndep_version = 1.0
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/action_builder.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-action_builder.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/app_identity.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_identity.pcm: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/app_version.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/app.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_identity.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/arg_key.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/arg_parser.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/arg_shortcut.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/arg.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/env.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-env.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/main.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli.pcm: dyndep | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_identity.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-action_builder.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/parse_error.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/parsed_arg.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/raw_args.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm: dyndep
+  restat = 1
+
+build libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/tui.cc.o | libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm
+  restat = 1
+

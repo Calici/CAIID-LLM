@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/parse_error.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:parse_error",
+          "source-path": "/app/libs/jowi-cli/src/parse_error.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

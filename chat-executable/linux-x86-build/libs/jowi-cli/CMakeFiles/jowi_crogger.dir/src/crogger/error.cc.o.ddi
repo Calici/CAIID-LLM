@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/error.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.crogger:error",
+          "source-path": "/app/libs/jowi-cli/src/crogger/error.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

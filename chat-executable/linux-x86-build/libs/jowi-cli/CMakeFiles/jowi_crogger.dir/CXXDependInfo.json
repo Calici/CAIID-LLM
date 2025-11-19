@@ -1,0 +1,106 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "Clang",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : 
+	{
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/context.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/context.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/emitter.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/emitter.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/error.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/error.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/filter.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/filter.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/formatter.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/formatter.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/logger.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/logger.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/main.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/main.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/severity.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/crogger",
+			"source" : "/app/libs/jowi-cli/src/crogger/severity.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		}
+	},
+	"database-info" : null,
+	"dir-cur-bld" : "/app/linux-x86-build/libs/jowi-cli",
+	"dir-cur-src" : "/app/libs/jowi-cli",
+	"dir-top-bld" : "/app/linux-x86-build",
+	"dir-top-src" : "/app",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/app/linux-x86-build/libs/jowi-generic/CMakeFiles/jowi_generic.dir",
+		"/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir"
+	],
+	"module-dir" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_crogger.dir",
+	"sources" : {}
+}

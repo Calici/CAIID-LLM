@@ -1,0 +1,30 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/formatter.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.crogger:formatter",
+          "source-path": "/app/libs/jowi-cli/src/crogger/formatter.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.tui"
+        },
+        {
+          "logical-name": "jowi.crogger:error"
+        },
+        {
+          "logical-name": "jowi.crogger:context"
+        },
+        {
+          "logical-name": "jowi.crogger:emitter"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

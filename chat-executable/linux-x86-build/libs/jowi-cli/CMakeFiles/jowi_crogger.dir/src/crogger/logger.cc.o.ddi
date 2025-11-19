@@ -1,0 +1,33 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/logger.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.crogger:logger",
+          "source-path": "/app/libs/jowi-cli/src/crogger/logger.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.crogger:emitter"
+        },
+        {
+          "logical-name": "jowi.crogger:filter"
+        },
+        {
+          "logical-name": "jowi.crogger:formatter"
+        },
+        {
+          "logical-name": "jowi.crogger:error"
+        },
+        {
+          "logical-name": "jowi.crogger:context"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

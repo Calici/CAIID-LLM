@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/raw_args.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:raw_args",
+          "source-path": "/app/libs/jowi-cli/src/raw_args.cc"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

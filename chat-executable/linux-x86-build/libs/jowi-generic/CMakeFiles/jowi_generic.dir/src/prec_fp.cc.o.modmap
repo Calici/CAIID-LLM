@@ -1,0 +1,3 @@
+-x c++-module
+-fmodule-output=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm
+-fmodule-file=jowi.generic:is_number=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm

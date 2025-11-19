@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-process/CMakeFiles/jowi_process.dir/src/platform/unix/subprocess_result.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.process:subprocess_result",
+          "source-path": "/app/libs/jowi-process/src/platform/unix/subprocess_result.cc"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

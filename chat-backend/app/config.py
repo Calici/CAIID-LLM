@@ -1,22 +1,28 @@
 """Application configuration and provider factories."""
 
-from functools import cached_property
-from pydantic_ai.providers.openai import OpenAIProvider
-from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai import Agent, Tool
-from pydantic_settings import BaseSettings
-from app.db import (
-    db_provider_manager,
-    SqliteProvider,
-    FilesSchema,
-    ConfigsSchema,
-    WorkspaceSchema,
-    TempFilesSchema,
-)
-from app.libs._chat import ChatState, AgenticKeywordMaker, ChatFile
-from app.libs.expected import Expected
-import pathlib
 import os
+import pathlib
+from functools import cached_property
+from typing import Type
+
+from pydantic_ai import Agent, Tool
+from pydantic_ai.models import Model as ArtificialIntelligenceModel
+from pydantic_ai.models.groq import GroqModel
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.groq import GroqProvider
+from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_settings import BaseSettings
+
+from app.db import (
+    ConfigsSchema,
+    FilesSchema,
+    SqliteProvider,
+    TempFilesSchema,
+    WorkspaceSchema,
+    db_provider_manager,
+)
+from app.libs._chat import AgenticKeywordMaker, ChatFile, ChatState
+from app.libs.expected import Expected
 
 
 class ConfigError(RuntimeError):
@@ -58,9 +64,25 @@ class Settings(BaseSettings):
     def config(self):
         return ConfigsSchema("configs")
 
-    def get_model(self) -> Expected[OpenAIChatModel, ConfigError]:
+    def __get_model(
+        self, server_name: str | None, model_name: str, api_url: str, api_key: str
+    ) -> ArtificialIntelligenceModel:
+        server_name = server_name if server_name is not None else None
+        if server_name is None or server_name == "LOCAL" or server_name == "OPEN_AI":
+            return OpenAIChatModel(
+                model_name=model_name,
+                provider=OpenAIProvider(base_url=api_url, api_key=api_key),
+            )
+        else:
+            return GroqModel(
+                model_name=model_name,
+                provider=GroqProvider(base_url=api_url, api_key=api_key),
+            )
+
+    def get_model(self) -> Expected[ArtificialIntelligenceModel, ConfigError]:
         """Return an OpenAIChatModel configured from persisted server settings."""
         with self.get_db_conn() as conn:
+            server_name = self.config.get_value("SERVER_NAME", conn)
             model_name = self.config.get_value("MODEL_NAME", conn)
             api_url = self.config.get_value("API_URL", conn)
             api_key = self.config.get_value("API_KEY", conn)
@@ -78,12 +100,8 @@ class Settings(BaseSettings):
                 OpenAIChatModel, ConfigError, ConfigError("api_key is missing")
             )
 
-        provider = OpenAIProvider(base_url=api_url, api_key=api_key)
-        return Expected(
-            OpenAIChatModel,
-            ConfigError,
-            OpenAIChatModel(model_name=model_name, provider=provider),
-        )
+        model = self.__get_model(server_name, model_name, api_url, api_key)
+        return Expected(type(model), ConfigError, model)
 
     def get_username(self):
         with self.get_db_conn() as conn:

@@ -1,0 +1,95 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "Clang",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : 
+	{
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/main.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src",
+			"source" : "/app/libs/jowi-process/src/main.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/platform/unix/subprocess.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/platform/unix",
+			"source" : "/app/libs/jowi-process/src/platform/unix/subprocess.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/platform/unix/subprocess_result.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/platform/unix",
+			"source" : "/app/libs/jowi-process/src/platform/unix/subprocess_result.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/platform/unix/unique_pid.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/platform/unix",
+			"source" : "/app/libs/jowi-process/src/platform/unix/unique_pid.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/subprocess_argument.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src",
+			"source" : "/app/libs/jowi-process/src/subprocess_argument.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/subprocess_env.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src",
+			"source" : "/app/libs/jowi-process/src/subprocess_env.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"libs/jowi-process/CMakeFiles/jowi_process.dir/src/subprocess_error.cc.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src",
+			"source" : "/app/libs/jowi-process/src/subprocess_error.cc",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		}
+	},
+	"database-info" : null,
+	"dir-cur-bld" : "/app/linux-x86-build/libs/jowi-process",
+	"dir-cur-src" : "/app/libs/jowi-process",
+	"dir-top-bld" : "/app/linux-x86-build",
+	"dir-top-src" : "/app",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/app/linux-x86-build/libs/jowi-generic/CMakeFiles/jowi_generic.dir"
+	],
+	"module-dir" : "/app/linux-x86-build/libs/jowi-process/CMakeFiles/jowi_process.dir",
+	"sources" : {}
+}

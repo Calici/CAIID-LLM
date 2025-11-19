@@ -1,10 +1,24 @@
 #!/bin/bash
 # Assume that we are currently in a MacOs environment
+rm -rf export
+rm -rf chat-executable/*-build
 cd chat-executable
 
 # CREATE FOLDER
-cpp-build-init -Bmacos-arm64-build -DCMAKE_OSX_ARCHITECTURE=arm64
-cpp-build-init -Bmacos-x86-build -DCMAKE_OSX_ARCHITECTURE=x86_64
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk \
+CC=/opt/homebrew/opt/llvm/bin/clang \
+CXX=/opt/homebrew/opt/llvm/bin/clang++ \
+cmake \
+-Bmacos-arm64-build -GNinja \
+-DCMAKE_OSX_ARCHITECTURES=arm64 \
+-DCMAKE_BUILD_TYPE=Release .
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk \
+CC=/opt/homebrew/opt/llvm/bin/clang \
+CXX=/opt/homebrew/opt/llvm/bin/clang++ \
+cmake \
+-Bmacos-x86-build -GNinja \
+-DCMAKE_OSX_ARCHITECTURES=x86_64 \
+-DCMAKE_BUILD_TYPE=Release .
 docker run \
     -it \
     --rm \
@@ -16,9 +30,11 @@ docker run \
     jowillianto/cpp-module-toolchain:jammy-cmake3.31-ninja1.11-llvm20 \
     cmake \
     -DCMAKE_EXE_LINKER_FLAGS=-lc++abi \
-    -DCMAKE_CXX_LINKER_FLAGS=-stdlib=libc++ \
+    -DCMAKE_CXX_FLAGS="-stdlib=libc++ -static" \
+    -DCMAKE_BUILD_TYPE=Release \
     -GNinja \
-    -Blinux-x86-build
+    -Blinux-x86-build \
+    .
 docker run \
     -it \
     --rm \
@@ -30,13 +46,16 @@ docker run \
     jowillianto/cpp-module-toolchain:jammy-cmake3.31-ninja1.11-llvm20 \
     cmake \
     -DCMAKE_EXE_LINKER_FLAGS=-lc++abi \
-    -DCMAKE_CXX_LINKER_FLAGS=-stdlib=libc++ \
+    -DCMAKE_CXX_FLAGS="-stdlib=libc++ -static" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DDRUG_SEARCH_CROSS_COMPILE_WSL=ON \
     -GNinja \
-    -Bwin-wsl-build
+    -Bwin-wsl-build \
+    .
 
 ## COMPILE
-cd macos-arm64-build && ninja
-cd macos-x86-build && ninja
+cd macos-arm64-build && ninja && cd ..
+cd macos-x86-build && ninja && cd ..
 docker run \
     -it \
     --rm \
@@ -75,10 +94,10 @@ mkdir export \
     export/macos_x86/llms \
     export/windows/llms \
 
-cp macos-arm64-build/Drug\ Search export/macos_arm64
-cp macos-x86-build/Drug\ Search export/macos_x86
-cp linux-x86-build/Drug\ Search export/linux
-cp win-wsl-build/Drug\ Search export/windows
+cp chat-executable/macos-arm64-build/Drug\ Search export/macos_arm64
+cp chat-executable/macos-x86-build/Drug\ Search export/macos_x86
+cp chat-executable/linux-x86-build/Drug\ Search export/linux
+cp chat-executable/win-wsl-build/Drug\ Search export/windows
 
 # Copy llama
 cp precompiled/linux/llama-server export/linux/llama.cpp
@@ -118,20 +137,22 @@ docker image save \
     drug-search-chat-backend
 
 # All Done, delete
-rm macos-arm64-build
-rm macos-x86-build
-rm win-wsl-build
-rm linux-x64-build
+rm -r chat-executable/macos-arm64-build
+rm -r chat-executable/macos-x86-build
+rm -r chat-executable/win-wsl-build
+rm -r chat-executable/linux-x86-build
 
 # Put models
 scp cal-tb01:/developer/jowi/llm-models/gemma-3-12B-it-Q4.gguf export/linux/llms/
-cp export/linux/llms export/macos_x86/llms
-cp export/linux/llms export/windows/llms
-cp export/linux/llms export/macos_arm64/llms
+cp export/linux/llms/* export/macos_x86/llms
+cp export/linux/llms/* export/windows/llms
+cp export/linux/llms/* export/macos_arm64/llms
 
 # Now tar or zip
 cd export
-tar -czf linux.tar.gz linux
-tar -czf macos_arm64.tar.gz macos_arm64
-tar -czf macos_x86.tar.gz macos_x86
+zip -vr linux.zip linux
+zip -vr macos_arm64.zip macos_arm64
+zip -vr macos_x86.zip macos_x86
 zip -vr windows.zip windows
+
+cp *.zip /Volumes/NO\ NAME

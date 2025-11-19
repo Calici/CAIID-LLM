@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/app_identity.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:app_identity",
+          "source-path": "/app/libs/jowi-cli/src/app_identity.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.cli:app_version"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

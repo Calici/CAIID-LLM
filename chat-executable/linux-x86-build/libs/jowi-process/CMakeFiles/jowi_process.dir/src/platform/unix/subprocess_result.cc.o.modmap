@@ -1,0 +1,2 @@
+-x c++-module
+-fmodule-output=libs/jowi-process/CMakeFiles/jowi_process.dir/jowi.process-subprocess_result.pcm

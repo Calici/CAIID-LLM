@@ -1,0 +1,33 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "Clang",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : {},
+	"database-info" : null,
+	"dir-cur-bld" : "/app/linux-x86-build",
+	"dir-cur-src" : "/app",
+	"dir-top-bld" : "/app/linux-x86-build",
+	"dir-top-src" : "/app",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir",
+		"/app/linux-x86-build/libs/jowi-process/CMakeFiles/jowi_process.dir",
+		"/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_crogger.dir",
+		"/app/linux-x86-build/libs/jowi-generic/CMakeFiles/jowi_generic.dir"
+	],
+	"module-dir" : "/app/linux-x86-build/CMakeFiles/main.dir",
+	"sources" : 
+	{
+		"CMakeFiles/main.dir/main.cc.o" : 
+		{
+			"language" : "CXX",
+			"source" : "/app/main.cc"
+		}
+	}
+}

@@ -1,0 +1,20 @@
+-x c++-module
+-fmodule-output=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm
+-fmodule-file=jowi.generic=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm
+-fmodule-file=jowi.cli:arg_key=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm
+-fmodule-file=jowi.cli:parsed_arg=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm
+-fmodule-file=jowi.cli:arg=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm
+-fmodule-file=jowi.cli:parse_error=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm
+-fmodule-file=jowi.cli:app_version=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm
+-fmodule-file=jowi.cli:arg_shortcut=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm
+-fmodule-file=jowi.cli:raw_args=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm
+-fmodule-file=jowi.generic:fixed_string=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-fixed_string.pcm
+-fmodule-file=jowi.generic:is_formattable_error=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_formattable_error.pcm
+-fmodule-file=jowi.generic:is_number=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm
+-fmodule-file=jowi.generic:key_vector=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-key_vector.pcm
+-fmodule-file=jowi.generic:prec_fp=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm
+-fmodule-file=jowi.generic:static_prec_fp=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_prec_fp.pcm
+-fmodule-file=jowi.generic:static_string=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_string.pcm
+-fmodule-file=jowi.generic:unique_handle=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-unique_handle.pcm
+-fmodule-file=jowi.generic:variant=libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-variant.pcm
+-fmodule-file=jowi.tui=libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm

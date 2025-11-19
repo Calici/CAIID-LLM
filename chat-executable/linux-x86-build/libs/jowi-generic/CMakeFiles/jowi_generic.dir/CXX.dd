@@ -1,0 +1,31 @@
+ninja_dyndep_version = 1.0
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/fixed_string.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-fixed_string.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/is_formattable_error.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_formattable_error.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/is_number.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/key_vector.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-key_vector.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/main.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-variant.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_prec_fp.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_string.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_formattable_error.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-key_vector.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-fixed_string.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-unique_handle.pcm
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/prec_fp.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/static_pref_cp.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_prec_fp.pcm: dyndep | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/static_string.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_string.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/unique_handle.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-unique_handle.pcm: dyndep
+  restat = 1
+
+build libs/jowi-generic/CMakeFiles/jowi_generic.dir/src/variant.cc.o | libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-variant.pcm: dyndep
+  restat = 1
+

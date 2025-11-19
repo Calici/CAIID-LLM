@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_crogger.dir/src/crogger/severity.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.crogger:severity",
+          "source-path": "/app/libs/jowi-cli/src/crogger/severity.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

@@ -1,0 +1,450 @@
+{
+	"modules" : 
+	{
+		"jowi.cli" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:action_builder" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-action_builder.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:app" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:app_identity" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_identity.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:app_version" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:arg" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:arg_key" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:arg_parser" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:arg_shortcut" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:env" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-env.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:parse_error" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:parsed_arg" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm",
+			"is-private" : false
+		},
+		"jowi.cli:raw_args" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm",
+			"is-private" : false
+		},
+		"jowi.tui" : 
+		{
+			"bmi" : "/app/linux-x86-build/libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm",
+			"is-private" : false
+		}
+	},
+	"references" : 
+	{
+		"jowi.cli" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli.pcm"
+		},
+		"jowi.cli:action_builder" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-action_builder.pcm"
+		},
+		"jowi.cli:app" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app.pcm"
+		},
+		"jowi.cli:app_identity" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_identity.pcm"
+		},
+		"jowi.cli:app_version" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-app_version.pcm"
+		},
+		"jowi.cli:arg" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg.pcm"
+		},
+		"jowi.cli:arg_key" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_key.pcm"
+		},
+		"jowi.cli:arg_parser" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_parser.pcm"
+		},
+		"jowi.cli:arg_shortcut" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-arg_shortcut.pcm"
+		},
+		"jowi.cli:env" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-env.pcm"
+		},
+		"jowi.cli:parse_error" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parse_error.pcm"
+		},
+		"jowi.cli:parsed_arg" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-parsed_arg.pcm"
+		},
+		"jowi.cli:raw_args" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.cli-raw_args.pcm"
+		},
+		"jowi.generic" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic.pcm"
+		},
+		"jowi.generic:fixed_string" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-fixed_string.pcm"
+		},
+		"jowi.generic:is_formattable_error" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_formattable_error.pcm"
+		},
+		"jowi.generic:is_number" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-is_number.pcm"
+		},
+		"jowi.generic:key_vector" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-key_vector.pcm"
+		},
+		"jowi.generic:prec_fp" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-prec_fp.pcm"
+		},
+		"jowi.generic:static_prec_fp" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_prec_fp.pcm"
+		},
+		"jowi.generic:static_string" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-static_string.pcm"
+		},
+		"jowi.generic:unique_handle" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-unique_handle.pcm"
+		},
+		"jowi.generic:variant" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-generic/CMakeFiles/jowi_generic.dir/jowi.generic-variant.pcm"
+		},
+		"jowi.tui" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "libs/jowi-cli/CMakeFiles/jowi_cli.dir/jowi.tui.pcm"
+		}
+	},
+	"usages" : 
+	{
+		"jowi.cli" : 
+		[
+			"jowi.cli:action_builder",
+			"jowi.cli:app",
+			"jowi.cli:app_identity",
+			"jowi.cli:app_version",
+			"jowi.cli:arg",
+			"jowi.cli:arg_key",
+			"jowi.cli:arg_parser",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.cli:parsed_arg",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant",
+			"jowi.tui"
+		],
+		"jowi.cli:action_builder" : 
+		[
+			"jowi.cli:app",
+			"jowi.cli:app_identity",
+			"jowi.cli:app_version",
+			"jowi.cli:arg",
+			"jowi.cli:arg_key",
+			"jowi.cli:arg_parser",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.cli:parsed_arg",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant",
+			"jowi.tui"
+		],
+		"jowi.cli:app" : 
+		[
+			"jowi.cli:app_identity",
+			"jowi.cli:app_version",
+			"jowi.cli:arg",
+			"jowi.cli:arg_key",
+			"jowi.cli:arg_parser",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.cli:parsed_arg",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant",
+			"jowi.tui"
+		],
+		"jowi.cli:app_identity" : 
+		[
+			"jowi.cli:app_version",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:app_version" : 
+		[
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:arg" : 
+		[
+			"jowi.cli:app_version",
+			"jowi.cli:arg_key",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.cli:parsed_arg",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant",
+			"jowi.tui"
+		],
+		"jowi.cli:arg_key" : 
+		[
+			"jowi.cli:parse_error",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:arg_parser" : 
+		[
+			"jowi.cli:app_version",
+			"jowi.cli:arg",
+			"jowi.cli:arg_key",
+			"jowi.cli:arg_shortcut",
+			"jowi.cli:parse_error",
+			"jowi.cli:parsed_arg",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant",
+			"jowi.tui"
+		],
+		"jowi.cli:arg_shortcut" : 
+		[
+			"jowi.cli:parse_error",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:env" : 
+		[
+			"jowi.cli:parse_error",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:parse_error" : 
+		[
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.cli:parsed_arg" : 
+		[
+			"jowi.cli:arg_key",
+			"jowi.cli:parse_error",
+			"jowi.cli:raw_args",
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.generic" : 
+		[
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		],
+		"jowi.generic:prec_fp" : 
+		[
+			"jowi.generic:is_number"
+		],
+		"jowi.generic:static_prec_fp" : 
+		[
+			"jowi.generic:is_number",
+			"jowi.generic:prec_fp"
+		],
+		"jowi.tui" : 
+		[
+			"jowi.generic",
+			"jowi.generic:fixed_string",
+			"jowi.generic:is_formattable_error",
+			"jowi.generic:is_number",
+			"jowi.generic:key_vector",
+			"jowi.generic:prec_fp",
+			"jowi.generic:static_prec_fp",
+			"jowi.generic:static_string",
+			"jowi.generic:unique_handle",
+			"jowi.generic:variant"
+		]
+	}
+}

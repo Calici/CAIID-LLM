@@ -1,0 +1,27 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/parsed_arg.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:parsed_arg",
+          "source-path": "/app/libs/jowi-cli/src/parsed_arg.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        },
+        {
+          "logical-name": "jowi.cli:raw_args"
+        },
+        {
+          "logical-name": "jowi.cli:arg_key"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

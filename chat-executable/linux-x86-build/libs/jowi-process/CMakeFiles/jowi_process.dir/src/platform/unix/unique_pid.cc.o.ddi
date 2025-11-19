@@ -1,0 +1,24 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-process/CMakeFiles/jowi_process.dir/src/platform/unix/unique_pid.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.process:unique_pid",
+          "source-path": "/app/libs/jowi-process/src/platform/unix/unique_pid.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.process:subprocess_error"
+        },
+        {
+          "logical-name": "jowi.process:subprocess_result"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

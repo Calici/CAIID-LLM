@@ -1,0 +1,42 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "libs/jowi-cli/CMakeFiles/jowi_cli.dir/src/app.cc.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "jowi.cli:app",
+          "source-path": "/app/libs/jowi-cli/src/app.cc"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "jowi.generic"
+        },
+        {
+          "logical-name": "jowi.tui"
+        },
+        {
+          "logical-name": "jowi.cli:parse_error"
+        },
+        {
+          "logical-name": "jowi.cli:arg_key"
+        },
+        {
+          "logical-name": "jowi.cli:arg_parser"
+        },
+        {
+          "logical-name": "jowi.cli:parsed_arg"
+        },
+        {
+          "logical-name": "jowi.cli:raw_args"
+        },
+        {
+          "logical-name": "jowi.cli:app_identity"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}
