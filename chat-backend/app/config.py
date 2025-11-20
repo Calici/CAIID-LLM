@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings
 
 from app.db import (
     ConfigsSchema,
+    DrugCentralQuery,
     FilesSchema,
     SqliteProvider,
     TempFilesSchema,
@@ -59,6 +60,9 @@ class Settings(BaseSettings):
     def get_db_conn(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         return db_provider_manager(SqliteProvider(self.db_path))
+
+    def get_dc_conn(self):
+        return SqliteProvider(self.assets_path / "drug_central.db")
 
     @cached_property
     def config(self):
@@ -147,6 +151,7 @@ class Settings(BaseSettings):
             return f.read()
 
     def get_chat_agent(self, state: ChatState):
+        state.append_drug_query(DrugCentralQuery(self.get_dc_conn(), 10))
         model = self.get_model()
         with open(self.prompt_dir() / "chat.md", "r") as f:
             return model.transform(

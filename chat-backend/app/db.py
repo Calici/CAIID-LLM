@@ -1,13 +1,19 @@
 from __future__ import annotations
-from typing import Protocol, final, TypeVar
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
+
+import contextlib
+import pathlib
 import sqlite3
 import uuid
-import pathlib
+from datetime import datetime
+from typing import Protocol, TypeVar, final
+
+import httpx
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import literal
 from sqlalchemy.dialects.sqlite import dialect as sqlite_dialect
-import contextlib
+
+from app.libs.drug_query import AgentError, PublicationResult
+from app.libs.expected import Expected
 
 RawDbCell = int | float | str | bytes | None
 RawDbRow = list[RawDbCell]
@@ -550,3 +556,92 @@ class ConfigsSchema:
                 value TEXT NOT NULL
             ) STRICT
         """
+
+
+@final
+class DrugCentralProduct(BaseModel):
+    id: str
+    ndc_product_code: str
+    form: str
+    generic_name: str
+    product_name: str
+    route: str
+    marketing_status: str
+    active_ingredient_count: int
+
+    def to_publication(self) -> PublicationResult:
+        return PublicationResult(
+            title=self.product_name,
+            abstract=f"""
+                <p>Generic Name: {self.generic_name}</p>
+                <p>Dosage Form: {self.form}</p>
+                <p>Dosage Route: {self.route}</p>
+                <p>Marketing Status: {self.marketing_status}</p>
+                <p>Active Ingredient Count: {self.active_ingredient_count}</p>
+            """,
+            authors=[],
+            source="Drug Central",
+            link=f"https://drugcentral.org/?q={self.product_name}",
+        )
+
+    @staticmethod
+    def to_dict(**kwargs):
+        return kwargs
+
+    @staticmethod
+    def query_with_kw(
+        provider: DBProvider, kws: list[str], limit: int, table: str = "product"
+    ) -> list[DrugCentralProduct]:
+        q = f"""
+            SELECT * FROM {table} WHERE
+            {
+            " OR ".join(
+                [
+                    f"generic_name LIKE '%{kw}%' OR product_name LIKE '%{kw}%'"
+                    for kw in kws
+                ]
+            )
+        } LIMIT {limit}
+        """
+        print(q)
+        rows = provider.run_query(
+            f"""
+                SELECT * FROM {table} WHERE
+                {
+                " OR ".join(
+                    [
+                        f"generic_name LIKE '%{kw}%' OR product_name LIKE '%{kw}%'"
+                        for kw in kws
+                    ]
+                )
+            } LIMIT {limit}
+            """
+        )
+        return [
+            DrugCentralProduct.model_validate(
+                DrugCentralProduct.to_dict(
+                    id=id,
+                    ndc_product_code=ndc_product_code,
+                    form=form,
+                    generic_name=generic_name,
+                    product_name=product_name,
+                    route=route,
+                    marketing_status=marketing_status,
+                    active_ingredient_count=active_ingredient_count,
+                )
+            )
+            for id, ndc_product_code, form, generic_name, product_name, route, marketing_status, active_ingredient_count in rows
+        ]
+
+
+class DrugCentralQuery:
+    def __init__(self, provider: DBProvider, res_count: int = 5):
+        self.res_count = res_count
+        self.provider = provider
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        with db_provider_manager(self.provider) as conn:
+            res = DrugCentralProduct.query_with_kw(conn, kws, self.res_count)
+        return PublicationResult.create_expected([d.to_publication() for d in res])

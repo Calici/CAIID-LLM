@@ -13,6 +13,7 @@ from app.libs.drug_query import (
     EuropePMCQuery,
     OpenFDAQuery,
     PubchemQuery,
+    PublicationQuery,
     PublicationQueryMaker,
     PublicationResult,
     PubmedQuery,
@@ -45,6 +46,7 @@ class ChatState:
         kw_maker: KeywordMaker,
         files: list[ChatFile],
         queries: list[PublicationResult],
+        additional_providers: list[PublicationQuery] = [],
     ):
         self.files = files
         self.messages = messages
@@ -54,9 +56,14 @@ class ChatState:
         self.pub_query_maker = PublicationQueryMaker(
             [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov(), ChemblQuery()]
         )
-        self.drug_query_maker = PublicationQueryMaker([OpenFDAQuery(), PubchemQuery()])
+        self.drug_query_maker = PublicationQueryMaker(
+            [OpenFDAQuery(), PubchemQuery(), *additional_providers]
+        )
         self.kw_maker = kw_maker
         self.allow_query = True
+
+    def append_drug_query(self, q: PublicationQuery):
+        self.drug_query_maker.qs.append(q)
 
     async def list_file(self):
         return self.files

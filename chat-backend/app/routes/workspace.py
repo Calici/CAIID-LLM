@@ -1,20 +1,23 @@
 from __future__ import annotations
+
 from collections.abc import AsyncIterable
 from typing import Literal
-from typing_extensions import Annotated
+
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
 from fastapi.exceptions import HTTPException
-from pydantic import BaseModel, AfterValidator
+from fastapi.responses import StreamingResponse
+from pydantic import AfterValidator, BaseModel
 from pydantic_ai.agent import Agent
+from typing_extensions import Annotated
+
 from app.config import settings
 from app.db import WorkspaceSchema
+from app.libs._chat import BlankKeywordMaker, ChatMessages, ChatState, FlatChatState
 from app.libs._chat.chat_message import (
     AIMessage,
     ToolCallCompleteMessage,
     ToolCallMessage,
 )
-from app.libs._chat import BlankKeywordMaker, ChatMessages, ChatState, FlatChatState
 from app.libs.drug_query import PublicationResult
 from app.routes.agent import create_topic_from_prompt
 
@@ -28,10 +31,6 @@ def _trim_check_blank(value: str) -> str:
 
 class WorkspaceRenamePayload(BaseModel):
     name: Annotated[str, AfterValidator(_trim_check_blank)]
-
-
-class WorkspaceChatPayload(BaseModel):
-    user_prompt: Annotated[str, AfterValidator(_trim_check_blank)]
 
 
 router = APIRouter()
