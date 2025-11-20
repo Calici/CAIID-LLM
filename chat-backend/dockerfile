@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y poppler-utils
+RUN apt clean
 WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
