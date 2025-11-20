@@ -183,6 +183,13 @@ class Settings(BaseSettings):
                             max_retries=1,
                         ),
                         Tool(
+                            state.query_drugs,
+                            name="query_drugs",
+                            description="Queries drugs, call get_publication to read the contents of queried drugs.",
+                            strict=True,
+                            max_retries=1,
+                        ),
+                        Tool(
                             state.get_publications,
                             name="get_publications",
                             description=(

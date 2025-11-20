@@ -1,21 +1,28 @@
 from __future__ import annotations
+
 import asyncio
+import pathlib
+from typing import final
+
+import httpx
 from pydantic import BaseModel, ValidationError
+
 from app.libs.drug_query import (
+    ChemblQuery,
     ClinicalTrialsGov,
     EuropePMCQuery,
+    OpenFDAQuery,
+    PubchemQuery,
     PublicationQueryMaker,
     PublicationResult,
     PubmedQuery,
 )
 from app.libs.file_reader import file_reader
-from .utils import ProjectCompare, find_in_list
-from .keyword_maker import BlankKeywordMaker, KeywordMaker
-from .chat_messages import ChatMessages
+
 from .chat_message import ChatMessage
-from typing import final
-import pathlib
-import httpx
+from .chat_messages import ChatMessages
+from .keyword_maker import BlankKeywordMaker, KeywordMaker
+from .utils import ProjectCompare, find_in_list
 
 
 class ChatFile(BaseModel):
@@ -45,8 +52,9 @@ class ChatState:
         self.queries = queries
         self.client = httpx.AsyncClient()
         self.pub_query_maker = PublicationQueryMaker(
-            [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov()]
+            [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov(), ChemblQuery()]
         )
+        self.drug_query_maker = PublicationQueryMaker([OpenFDAQuery(), PubchemQuery()])
         self.kw_maker = kw_maker
         self.allow_query = True
 
@@ -87,6 +95,23 @@ class ChatState:
                 ]
             )
         )
+
+    async def query_drugs(self):
+        if not self.allow_query:
+            return (
+                f"Found {len(self.queries)}. Call get_publications to retrieve entries"
+            )
+        self.allow_query = False
+        kws = await self.kw_maker.get_keywords(self.messages)
+        if len(kws) == 0:
+            return "No keywords. Be more specific"
+        res = await self.drug_query_maker.query(kws)
+        if res.has_value():
+            self.queries = res.value()
+            return (
+                f"Found {len(self.queries)}. Call get_publications to retrieve entries"
+            )
+        return "failure"
 
     async def query_publications(self):
         if not self.allow_query:

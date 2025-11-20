@@ -1,11 +1,31 @@
 from __future__ import annotations
-from pydantic import BaseModel, ValidationError
-from typing import Protocol, final
-from app.libs.expected import Expected
-import xml.etree.ElementTree as ET
-import httpx
-import logging
+
+import asyncio
 import json
+import logging
+import xml.etree.ElementTree as ET
+from typing import Protocol, final
+
+import httpx
+from pydantic import BaseModel, ValidationError
+
+from app.libs.expected import Expected
+
+
+def create_kv_abstract(v: dict[str, str | None]) -> str:
+    root = ET.Element("div")
+    for key, value in v.items():
+        elm = ET.SubElement(root, "p")
+        elm.text = f"{key}: {value}"
+    return ET.tostring(root).decode()
+
+
+def stitch_line(v: list[str]) -> str:
+    root = ET.Element("div")
+    for e in v:
+        elm = ET.SubElement(root, "p")
+        elm.text = e
+    return ET.tostring(root).decode()
 
 
 class AgentError(BaseModel):
@@ -95,7 +115,7 @@ class PubmedQuery:
                 else None
             )
             doi = article.find("MedlineCitation/Article/ELocationID[@EIdType='doi']")
-            if doi is not None:
+            if doi is not None and doi.text is not None:
                 doi = await DoiResolver().resolve(doi.text, client)
             try:
                 summaries.append(
@@ -265,3 +285,216 @@ class PublicationQueryMaker:
                 return res
             results.extend(res.value())
         return PublicationResult.create_expected(results)
+
+
+class FDADrugIngredient(BaseModel):
+    name: str
+    strength: str
+
+
+class FDADrug(BaseModel):
+    sponsor_name: str
+    application_number: str
+    brand_name: str
+    active_ingredients: list[FDADrugIngredient]
+    dosage_form: str | None
+    dosage_route: str | None
+    marketing_status: str | None
+
+    def to_publication(self) -> PublicationResult:
+        return PublicationResult(
+            title=self.brand_name,
+            abstract=create_kv_abstract(
+                {
+                    "Application Number": self.application_number,
+                    "Dosage Form": self.dosage_form,
+                    "Dosage Route": self.dosage_route,
+                    "Marketing Status": self.marketing_status,
+                }
+            )
+            + stitch_line(
+                [
+                    "Active Ingredients: ",
+                    *[f"- {v.name} {v.strength}" for v in self.active_ingredients],
+                ]
+            ),
+            authors=[self.sponsor_name],
+            source="OpenFDA",
+            link=None,
+        )
+
+    @staticmethod
+    def create_expected(
+        v: list[FDADrug] | AgentError,
+    ) -> Expected[list[FDADrug], AgentError]:
+        return Expected(list, AgentError, v)
+
+
+class OpenFDAQuery:
+    def __init__(self, res_count: int = 5):
+        self.res_count = res_count
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        res = await client.get(
+            "https://api.fda.gov/drug/drugsfda.json",
+            params={
+                "search": f"products.active_ingredients.name={' '.join([kw for kw in kws])}",
+                "limit": 5,
+            },
+        )
+        if res.status_code > 299:
+            return PublicationResult.create_expected(AgentError(message=res.text))
+        parsed_res = json.loads(res.text)
+        drugs: list[FDADrug] = []
+        for r in parsed_res["results"]:
+            drugs.extend(
+                [
+                    FDADrug(
+                        sponsor_name=r["sponsor_name"],
+                        application_number=r["application_number"],
+                        brand_name=product["brand_name"],
+                        active_ingredients=[
+                            FDADrugIngredient(name=x["name"], strength=x["strength"])
+                            for x in product.get("active_ingredients", [])
+                        ],
+                        dosage_form=product.get("dosage_form"),
+                        dosage_route=product.get("dosage_route"),
+                        marketing_status=product.get("marketing_status"),
+                    )
+                    for product in r.get("products", [])
+                ]
+            )
+        return PublicationResult.create_expected(
+            [drug.to_publication() for drug in drugs]
+        )
+
+
+class ChemblQuery:
+    def __init__(self, res_count: int = 5):
+        self.res_count = res_count
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        res = await client.get(
+            "https://www.ebi.ac.uk/chembl/api/data/document/search",
+            params={"q": " ".join(kws)},
+        )
+        if res.status_code > 299:
+            return PublicationResult.create_expected(AgentError(message=res.text))
+        response = ET.fromstring(res.text)
+        summaries: list[PublicationResult] = []
+        for document in response.findall(".//document"):
+            abstract = document.find("abstract")
+            authors = document.find("authors")
+            doi = document.find("doi")
+            title = document.find("title")
+            pub_date = document.find("chembl_release/creation_date")
+            if doi is not None and doi.text is not None and len(doi.text) != 0:
+                doi = await DoiResolver().resolve(doi.text, client)
+            else:
+                doi = None
+            try:
+                summaries.append(
+                    PublicationResult.model_validate(
+                        {
+                            "title": title.text if title is not None else None,
+                            "pub_date": pub_date.text if pub_date is not None else None,
+                            "authors": authors.text.split(",")
+                            if authors is not None and authors.text is not None
+                            else [],
+                            "link": doi,
+                            "abstract": abstract.text if abstract is not None else None,
+                            "source": "CHEMBL",
+                        }
+                    )
+                )
+            except ValidationError as e:
+                logging.error(f"PubmedQuery {str(e)}")
+                continue
+        return PublicationResult.create_expected(summaries)
+
+
+class PubchemCompound(BaseModel):
+    name: str
+    iupac_name: str | None
+    molecular_formula: str
+    molecular_weight: float
+    inchi: str
+    id: str
+
+    def to_publication(self) -> PublicationResult:
+        return PublicationResult(
+            title=self.name,
+            source="Pubchem",
+            abstract=create_kv_abstract(
+                {
+                    "IUPAC Name": self.iupac_name,
+                    "Molecular Formula": self.molecular_formula,
+                    "Molecular Weight": str(round(self.molecular_weight, 3)),
+                    "Inchi": self.inchi,
+                }
+            ),
+            authors=[],
+            link=f"https://pubchem.ncbi.nlm.nih.gov/compound/{self.id}",
+        )
+
+    @staticmethod
+    def create_expected(
+        v: list[PubchemCompound] | AgentError,
+    ) -> Expected[list[PubchemCompound], AgentError]:
+        return Expected(list, AgentError, v)
+
+    @staticmethod
+    def create_single_expected(
+        v: PubchemCompound | AgentError,
+    ) -> Expected[PubchemCompound, AgentError]:
+        return Expected(PubchemCompound, AgentError, v)
+
+
+class PubchemQuery:
+    def __init__(self, res_count: int = 5):
+        self.res_count = res_count
+
+    async def cid_to_data(
+        self, client: httpx.AsyncClient, cid: str
+    ) -> Expected[PubchemCompound, AgentError]:
+        res = await client.get(
+            f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/property/Title,IUPACName,MolecularFormula,MolecularWeight,Inchi/json"
+        )
+        if res.status_code > 299:
+            return PubchemCompound.create_single_expected(AgentError(message=res.text))
+        compound = json.loads(res.text)["PropertyTable"]["Properties"][0]
+        return PubchemCompound.create_single_expected(
+            PubchemCompound(
+                id=str(compound["CID"]),
+                molecular_formula=compound["MolecularFormula"],
+                molecular_weight=compound["MolecularWeight"],
+                inchi=compound["InChI"],
+                iupac_name=compound["IUPACName"],
+                name=compound["Title"],
+            )
+        )
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        cids: set[str] = set()
+        for kw in kws:
+            res = await client.get(
+                f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{kw}/cids/json"
+            )
+            if res.status_code > 299:
+                continue
+            parsed_payload = json.loads(res.text)
+            for cid in parsed_payload["IdentifierList"].get("CID", []):
+                cids.add(str(cid))
+        compounds = await asyncio.gather(
+            *[self.cid_to_data(client, cid) for cid in cids]
+        )
+        compounds = [compound.value() for compound in compounds if compound.has_value()]
+        return PublicationResult.create_expected(
+            [compound.to_publication() for compound in compounds]
+        )
