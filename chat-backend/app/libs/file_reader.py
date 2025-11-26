@@ -4,9 +4,9 @@ import asyncio
 import csv
 import pathlib
 import subprocess
+import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import PurePosixPath
-import xml.etree.ElementTree as ET
 from typing import Protocol, final
 
 from docx import Document
@@ -58,8 +58,8 @@ class PDFReader:
 class PlainTextReader:
     async def read_file(self, p: pathlib.Path) -> Expected[str, FileReaderError]:
         try:
-            with open(p, "r") as f:
-                return _FileReader.create_expected(f.read())
+            f = open(p, "r", encoding="utf-8-sig")
+            return _FileReader.create_expected(f.read())
         except IOError:
             return _FileReader.create_expected(FileReaderError("file read error"))
 
@@ -119,12 +119,8 @@ class CSVReader:
 @final
 class XlsxReader:
     _SPREADSHEET_NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-    _REL_NS = (
-        "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
-    )
-    _PACKAGE_REL_NS = (
-        "{http://schemas.openxmlformats.org/package/2006/relationships}"
-    )
+    _REL_NS = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
+    _PACKAGE_REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 
     async def read_file(self, p: pathlib.Path) -> Expected[str, FileReaderError]:
         try:
@@ -186,10 +182,7 @@ class XlsxReader:
         root = ET.fromstring(shared_strings_xml)
         values: list[str] = []
         for si in root.findall(f"{self._SPREADSHEET_NS}si"):
-            texts = [
-                t.text or ""
-                for t in si.findall(f".//{self._SPREADSHEET_NS}t")
-            ]
+            texts = [t.text or "" for t in si.findall(f".//{self._SPREADSHEET_NS}t")]
             values.append("".join(texts))
         return values
 
@@ -209,17 +202,14 @@ class XlsxReader:
             headers.append(self._parse_cell(cell, shared_strings))
         return headers
 
-    def _parse_cell(
-        self, cell: ET.Element, shared_strings: list[str]
-    ) -> str:
+    def _parse_cell(self, cell: ET.Element, shared_strings: list[str]) -> str:
         cell_type = cell.attrib.get("t")
         if cell_type == "inlineStr":
             inline = cell.find(f"{self._SPREADSHEET_NS}is")
             if inline is None:
                 return ""
             texts = [
-                t.text or ""
-                for t in inline.findall(f".//{self._SPREADSHEET_NS}t")
+                t.text or "" for t in inline.findall(f".//{self._SPREADSHEET_NS}t")
             ]
             return "".join(texts)
 
