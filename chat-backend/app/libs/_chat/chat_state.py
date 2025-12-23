@@ -17,6 +17,7 @@ from app.libs.drug_query import (
     PublicationQueryMaker,
     PublicationResult,
     PubmedQuery,
+    UniprotQuery,
 )
 from app.libs.file_reader import file_reader
 
@@ -54,10 +55,15 @@ class ChatState:
         self.queries = queries
         self.client = httpx.AsyncClient()
         self.pub_query_maker = PublicationQueryMaker(
-            [PubmedQuery(), EuropePMCQuery(), ClinicalTrialsGov(), ChemblQuery()]
+            [
+                PubmedQuery(),
+                EuropePMCQuery(),
+                ClinicalTrialsGov(),
+                ChemblQuery(),
+            ]
         )
         self.drug_query_maker = PublicationQueryMaker(
-            [OpenFDAQuery(), PubchemQuery(), *additional_providers]
+            [OpenFDAQuery(), PubchemQuery(), UniprotQuery(), *additional_providers]
         )
         self.kw_maker = kw_maker
         self.allow_query = True

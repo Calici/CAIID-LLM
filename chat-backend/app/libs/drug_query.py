@@ -498,3 +498,41 @@ class PubchemQuery:
         return PublicationResult.create_expected(
             [compound.to_publication() for compound in compounds]
         )
+
+
+class UniprotQuery:
+    def __init__(self, res_count: int = 5):
+        self.res_count = res_count
+
+    async def query(
+        self, client: httpx.AsyncClient, kws: list[str]
+    ) -> Expected[list[PublicationResult], AgentError]:
+        results: list[PublicationResult] = []
+        for kw in kws:
+            res = await client.get(
+                "https://rest.uniprot.org/uniprotkb/search",
+                params={"query": kw, "size": self.res_count},
+            )
+            if res.status_code > 299:
+                continue
+            payload = json.loads(res.text)
+            for res in payload["results"]:
+                abstract = f"{res['proteinDescription']['recommendedName']['fullName']['value']}"
+                for comment in res["comments"]:
+                    if "texts" in "comments":
+                        abstract = (
+                            abstract
+                            + f"{comment['commentType']}\n{comment['texts'][0]['value']}\n"
+                        )
+                results.append(
+                    PublicationResult.model_validate(
+                        {
+                            "title": f"{res['primaryAccession']}.{res['uniProtkbId']}",
+                            "source": "Uniprot",
+                            "abstract": abstract,
+                            "authors": [],
+                            "link": f"https://uniprot.org/uniprotkb/${res['primaryAccession']}/entry",
+                        }
+                    )
+                )
+        return PublicationResult.create_expected(results)
