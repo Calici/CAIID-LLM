@@ -11,7 +11,7 @@ option (
     DRUG_SEARCH_CROSS_COMPILE_WSL "Cross Compile for WSL" OFF
 )
 set (DRUG_SEARCH_EXECUTABLE_NAME "Drug Search")
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-generic)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-generic)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-cli)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libs/jowi-process)
 
